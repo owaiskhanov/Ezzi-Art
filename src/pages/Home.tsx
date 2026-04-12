@@ -282,7 +282,7 @@ export function Home() {
           style={{ y: statsY }}
         >
           <img 
-            src="https://images.unsplash.com/photo-1610505466021-48293774889c?q=80&w=2000&auto=format&fit=crop" 
+            src="https://images.unsplash.com/photo-1582561424760-0321d6cb28cb?q=80&w=2000&auto=format&fit=crop" 
             alt="Workshop background" 
             className="w-full h-full object-cover grayscale scale-125"
             referrerPolicy="no-referrer"

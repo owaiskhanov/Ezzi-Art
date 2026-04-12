@@ -13,8 +13,8 @@ export function About() {
           transition={{ duration: 1.5, ease: "easeOut" }}
         >
           <img 
-            src="https://images.unsplash.com/photo-1610505466021-48293774889c?q=80&w=2000&auto=format&fit=crop" 
-            alt="Workshop crafting frames" 
+            src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=2000&auto=format&fit=crop" 
+            alt="Beautiful framed art on a wall" 
             className="w-full h-full object-cover opacity-60"
             referrerPolicy="no-referrer"
           />
