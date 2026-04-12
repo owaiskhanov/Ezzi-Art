@@ -1,7 +1,30 @@
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform, useInView, animate } from "motion/react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, Star, BugOff, Palette, Droplets, HeartHandshake } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
+
+function AnimatedCounter({ value, suffix = "", format = true }: { value: number, suffix?: string, format?: boolean }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-50px" });
+
+  useEffect(() => {
+    if (inView && ref.current) {
+      const controls = animate(0, value, {
+        duration: 2.5,
+        ease: "easeOut",
+        onUpdate(v) {
+          if (ref.current) {
+            const formatted = format ? Math.floor(v).toLocaleString('en-IN') : Math.floor(v);
+            ref.current.textContent = `${formatted}${suffix}`;
+          }
+        }
+      });
+      return () => controls.stop();
+    }
+  }, [inView, value, suffix, format]);
+
+  return <span ref={ref}>0{suffix}</span>;
+}
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -23,8 +46,44 @@ export function Home() {
     offset: ["start start", "end start"]
   });
   
-  const y = useTransform(heroScroll, [0, 1], ["0%", "30%"]);
+  const y = useTransform(heroScroll, [0, 1], ["0%", "60%"]);
+  const textY = useTransform(heroScroll, [0, 1], ["0%", "40%"]);
   const opacity = useTransform(heroScroll, [0, 1], [1, 0]);
+
+  const statsRef = useRef(null);
+  const { scrollYProgress: statsScroll } = useScroll({
+    target: statsRef,
+    offset: ["start end", "end start"]
+  });
+  const statsY = useTransform(statsScroll, [0, 1], ["-20%", "20%"]);
+
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const testimonials = [
+    { name: "Ronak", text: "We ordered 18 frames for a corporate event and were very pleased with the expedited, on-time delivery. So many layout options, such immediate responses. Truly impressive." },
+    { name: "Rahul", text: "I needed urgent dispatch for a client's room — the team delivered on time, and the quality of the frame was genuinely top-notch. Highly recommend." },
+    { name: "Ajay", text: "The wooden frame I bought is worth every penny. Better quality than a branded photo studio — and the suggestions they made for my home were spot on." },
+  ];
+
+  const handleTestimonialScroll = () => {
+    if (scrollContainerRef.current) {
+      const scrollLeft = scrollContainerRef.current.scrollLeft;
+      const scrollWidth = scrollContainerRef.current.scrollWidth - scrollContainerRef.current.clientWidth;
+      if (scrollWidth > 0) {
+        const index = Math.round((scrollLeft / scrollWidth) * (testimonials.length - 1));
+        setActiveTestimonial(index);
+      }
+    }
+  };
+
+  const scrollToTestimonial = (index: number) => {
+    if (scrollContainerRef.current) {
+      const scrollWidth = scrollContainerRef.current.scrollWidth - scrollContainerRef.current.clientWidth;
+      const targetScroll = (index / (testimonials.length - 1)) * scrollWidth;
+      scrollContainerRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' });
+    }
+  };
 
   return (
     <main className="w-full bg-offwhite">
@@ -54,7 +113,10 @@ export function Home() {
         <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/30 to-transparent" />
         <div className="absolute inset-0 z-10 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
         
-        <div className="relative z-20 max-w-5xl mx-auto px-6 text-center flex flex-col items-center mt-20">
+        <motion.div 
+          className="relative z-20 max-w-5xl mx-auto px-6 text-center flex flex-col items-center mt-20"
+          style={{ y: textY }}
+        >
           <motion.div
             initial="hidden"
             animate="visible"
@@ -87,7 +149,7 @@ export function Home() {
               </Link>
             </motion.div>
           </motion.div>
-        </div>
+        </motion.div>
 
         <motion.div 
           className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1px] h-32 bg-gradient-to-b from-transparent via-gold-light to-gold-light z-20"
@@ -144,14 +206,14 @@ export function Home() {
               { icon: ShieldCheck, title: "Durable Products", desc: "Built to outlast generations with uncompromising structural integrity." },
               { icon: Star, title: "Superior Quality", desc: "Premium materials and flawless finishes for a museum-grade look." },
               { icon: BugOff, title: "Termite Resistant", desc: "Specially treated and crafted to withstand India's unique climate." },
-              { icon: Palette, title: "Wide Array of Designs", desc: "Over 100+ curated styles across every aesthetic and taste." },
-              { icon: Droplets, title: "Moisture Resistant", desc: "Advanced sealing ensures your frames stay flawless year-round." },
-              { icon: HeartHandshake, title: "Exceptional Service", desc: "A dedicated team that stands by you, from selection to installation." },
+              { icon: Palette, title: "Wide Array of Designs", desc: "Over 100+ curated styles across every aesthetic and taste.", hideOnMobile: true },
+              { icon: Droplets, title: "Moisture Resistant", desc: "Advanced sealing ensures your frames stay flawless year-round.", hideOnMobile: true },
+              { icon: HeartHandshake, title: "Exceptional Service", desc: "A dedicated team that stands by you, from selection to installation.", hideOnMobile: true },
             ].map((feature, idx) => (
               <motion.div
                 key={idx}
                 variants={fadeInUp}
-                className="bg-white p-10 border border-gray-100 hover:border-gold-light/50 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] transition-all duration-500 group relative overflow-hidden"
+                className={`bg-white p-10 border border-gray-100 hover:border-gold-light/50 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] transition-all duration-500 group relative overflow-hidden ${feature.hideOnMobile ? 'hidden md:block' : ''}`}
               >
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gold-light to-gold-dark transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out" />
                 <feature.icon className="w-10 h-10 text-gold-light mb-8 group-hover:scale-110 group-hover:text-gold-dark transition-all duration-500" strokeWidth={1} />
@@ -214,15 +276,18 @@ export function Home() {
       </section>
 
       {/* SECTION 5 — STATS BAR */}
-      <section className="relative py-24 bg-charcoal overflow-hidden">
-        <div className="absolute inset-0 z-0 opacity-20">
+      <section ref={statsRef} className="relative py-24 bg-charcoal overflow-hidden">
+        <motion.div 
+          className="absolute inset-0 z-0 opacity-20"
+          style={{ y: statsY }}
+        >
           <img 
             src="https://images.unsplash.com/photo-1610505466021-48293774889c?q=80&w=2000&auto=format&fit=crop" 
             alt="Workshop background" 
-            className="w-full h-full object-cover grayscale"
+            className="w-full h-full object-cover grayscale scale-125"
             referrerPolicy="no-referrer"
           />
-        </div>
+        </motion.div>
         <div className="absolute inset-0 z-10 bg-gold-dark/90 mix-blend-multiply" />
         
         <div className="relative z-20 max-w-7xl mx-auto px-6">
@@ -234,17 +299,19 @@ export function Home() {
             className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-white/20"
           >
             {[
-              { num: "1 Lakh+", label: "Frames Sold" },
-              { num: "100+", label: "Design Options" },
-              { num: "15+", label: "Years of Experience" },
-              { num: "50+", label: "Product Innovations" },
+              { value: 100000, suffix: "+", label: "Frames Sold" },
+              { value: 100, suffix: "+", label: "Design Options" },
+              { value: 15, suffix: "+", label: "Years of Experience" },
+              { value: 50, suffix: "+", label: "Product Innovations" },
             ].map((stat, idx) => (
               <motion.div
                 key={idx}
                 variants={fadeInUp}
                 className="flex flex-col items-center justify-center text-center py-8 md:py-0"
               >
-                <span className="text-5xl md:text-6xl lg:text-7xl font-serif text-white mb-4 drop-shadow-lg">{stat.num}</span>
+                <span className="text-5xl md:text-6xl lg:text-7xl font-serif text-white mb-4 drop-shadow-lg">
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                </span>
                 <span className="text-white/90 uppercase tracking-[0.2em] text-xs font-medium">{stat.label}</span>
               </motion.div>
             ))}
@@ -267,12 +334,12 @@ export function Home() {
             </h2>
           </div>
 
-          <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-12 -mx-6 px-6 md:px-[10vw] gap-8">
-            {[
-              { name: "Ronak", text: "We ordered 18 frames for a corporate event and were very pleased with the expedited, on-time delivery. So many layout options, such immediate responses. Truly impressive." },
-              { name: "Rahul", text: "I needed urgent dispatch for a client's room — the team delivered on time, and the quality of the frame was genuinely top-notch. Highly recommend." },
-              { name: "Ajay", text: "The wooden frame I bought is worth every penny. Better quality than a branded photo studio — and the suggestions they made for my home were spot on." },
-            ].map((testimonial, idx) => (
+          <div 
+            ref={scrollContainerRef}
+            onScroll={handleTestimonialScroll}
+            className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-12 -mx-6 px-6 md:px-[10vw] gap-8"
+          >
+            {testimonials.map((testimonial, idx) => (
               <motion.div 
                 key={idx}
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -294,6 +361,22 @@ export function Home() {
               </motion.div>
             ))}
           </div>
+
+          {/* Carousel Indicators */}
+          <div className="flex justify-center items-center gap-3 mt-4">
+            {testimonials.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => scrollToTestimonial(idx)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  activeTestimonial === idx 
+                    ? "bg-gold-light scale-125" 
+                    : "bg-gray-300 hover:bg-gold-light/50"
+                }`}
+                aria-label={`Go to testimonial ${idx + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -313,7 +396,7 @@ export function Home() {
               "Reliance Industries", "Abbott Laboratories", "AkzoNobel", "Taj Hotels (IHCL)", 
               "Centaur Pharmaceuticals", "Koye Pharma", "Fabtech Life Engineering", "Glapha Labs"
             ].map((client, idx) => (
-              <span key={idx} className="text-2xl md:text-3xl font-serif text-gray-300 group-hover:text-charcoal transition-colors duration-700 px-8">
+              <span key={idx} className="text-2xl md:text-3xl font-serif text-gray-400 hover:text-gold-dark hover:font-bold transition-all duration-300 px-8 cursor-default">
                 {client}
               </span>
             ))}
@@ -323,7 +406,7 @@ export function Home() {
               "Reliance Industries", "Abbott Laboratories", "AkzoNobel", "Taj Hotels (IHCL)", 
               "Centaur Pharmaceuticals", "Koye Pharma", "Fabtech Life Engineering", "Glapha Labs"
             ].map((client, idx) => (
-              <span key={idx} className="text-2xl md:text-3xl font-serif text-gray-300 group-hover:text-charcoal transition-colors duration-700 px-8">
+              <span key={idx} className="text-2xl md:text-3xl font-serif text-gray-400 hover:text-gold-dark hover:font-bold transition-all duration-300 px-8 cursor-default">
                 {client}
               </span>
             ))}
