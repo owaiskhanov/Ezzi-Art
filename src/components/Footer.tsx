@@ -39,7 +39,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 justify-center md:justify-start">
                 <Phone className="w-5 h-5 text-gold-light shrink-0" />
-                <span>+91 98765 43210</span>
+                <span>022-32171624</span>
               </li>
               <li className="flex items-center gap-3 justify-center md:justify-start">
                 <Mail className="w-5 h-5 text-gold-light shrink-0" />
@@ -55,10 +55,10 @@ export function Footer() {
               Stay updated with our latest collections and framing inspirations.
             </p>
             <div className="flex gap-4">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-charcoal hover:bg-gold-light hover:text-white transition-colors">
+              <a href="https://www.instagram.com/ezziartsandframe/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-charcoal hover:bg-gold-light hover:text-white transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-charcoal hover:bg-gold-light hover:text-white transition-colors">
+              <a href="https://www.facebook.com/EzziArtsFrames" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-charcoal hover:bg-gold-light hover:text-white transition-colors">
                 <Facebook className="w-5 h-5" />
               </a>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-charcoal hover:bg-gold-light hover:text-white transition-colors">
