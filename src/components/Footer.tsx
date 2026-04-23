@@ -24,8 +24,7 @@ export function Footer() {
             <ul className="space-y-4 text-gray-600">
               <li><Link to="/" className="hover:text-gold-light transition-colors">Home</Link></li>
               <li><Link to="/about" className="hover:text-gold-light transition-colors">Our Story</Link></li>
-              <li><Link to="/#collections" className="hover:text-gold-light transition-colors">Collections</Link></li>
-              <li><Link to="/#testimonials" className="hover:text-gold-light transition-colors">Testimonials</Link></li>
+              <li><Link to="/customize" className="hover:text-gold-light transition-colors">Customize Frame</Link></li>
             </ul>
           </div>
 

@@ -136,10 +136,10 @@ export function Home() {
             
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-6 w-full sm:w-auto">
               <Link 
-                to="/#collections" 
+                to="/customize" 
                 className="px-10 py-4 bg-gold-light text-white font-medium tracking-[0.15em] uppercase text-xs hover:bg-gold-dark transition-all duration-500 w-full sm:w-auto shadow-[0_0_40px_rgba(212,175,55,0.3)] hover:shadow-[0_0_60px_rgba(212,175,55,0.5)]"
               >
-                Explore Our Frames
+                Customize Your Frame
               </Link>
               <Link 
                 to="/#contact" 
@@ -222,56 +222,6 @@ export function Home() {
               </motion.div>
             ))}
           </motion.div>
-        </div>
-      </section>
-
-      {/* SECTION 4 — PRODUCT COLLECTIONS (Editorial Gallery) */}
-      <section id="collections" className="py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
-            <span className="text-gold-light text-xs font-medium tracking-[0.3em] uppercase mb-6 block">
-              OUR COLLECTIONS
-            </span>
-            <h2 className="text-4xl md:text-6xl font-serif text-charcoal mb-8">
-              A Frame for Every Story
-            </h2>
-            <p className="text-gray-500 text-lg max-w-2xl mx-auto font-light">
-              From intimate home portraits to grand corporate gifting — our collections span every occasion and aesthetic.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-            {[
-              { title: "Ezzi Frames", tag: "Premium. Artistic. Timeless.", img: "https://images.unsplash.com/photo-1577083552431-6e5fd01988ec?q=80&w=1200&auto=format&fit=crop", span: "md:col-span-8" },
-              { title: "Alif Frames", tag: "Elegance in every edge.", img: "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?q=80&w=800&auto=format&fit=crop", span: "md:col-span-4" },
-              { title: "Aqa Maula Frames", tag: "Crafted with reverence.", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=800&auto=format&fit=crop", span: "md:col-span-5" },
-              { title: "Corporate & Gifting", tag: "Make every occasion memorable.", img: "https://images.unsplash.com/photo-1580136608260-4eb11f4b24fe?q=80&w=1200&auto=format&fit=crop", span: "md:col-span-7" },
-            ].map((collection, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.8, delay: idx * 0.15, ease: [0.2, 0.65, 0.3, 0.9] }}
-                className={`relative h-[450px] md:h-[600px] group overflow-hidden cursor-pointer ${collection.span}`}
-              >
-                <img 
-                  src={collection.img} 
-                  alt={collection.title} 
-                  className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-charcoal/20 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-500" />
-                <div className="absolute bottom-0 left-0 w-full p-10 flex flex-col items-start translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                  <h3 className="text-3xl md:text-4xl font-serif text-white mb-3 drop-shadow-md">{collection.title}</h3>
-                  <p className="text-gold-light italic font-serif text-lg mb-8 drop-shadow-md">{collection.tag}</p>
-                  <span className="text-white font-medium uppercase tracking-[0.2em] text-xs opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100 flex items-center">
-                    Explore Collection <span className="text-gold-light ml-3 text-lg leading-none">→</span>
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 

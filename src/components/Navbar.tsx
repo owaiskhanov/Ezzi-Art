@@ -26,7 +26,6 @@ export function Navbar() {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "About Us", path: "/about" },
-    { name: "Collections", path: "/#collections" },
     { name: "Contact", path: "/#contact" },
   ];
 
@@ -70,7 +69,7 @@ export function Navbar() {
             </Link>
           ))}
           <Link
-            to="/#contact"
+            to="/customize"
             className={cn(
               "px-5 py-2 text-sm font-medium tracking-wide uppercase transition-all border",
               isTransparent 
@@ -78,7 +77,7 @@ export function Navbar() {
                 : "border-gold-light text-gold-light hover:bg-gold-light hover:text-white"
             )}
           >
-            Get in Touch
+            Customize
           </Link>
         </div>
 

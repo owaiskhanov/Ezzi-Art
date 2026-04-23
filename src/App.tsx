@@ -5,6 +5,7 @@ import { Footer } from "./components/Footer";
 import { WhatsAppButton } from "./components/WhatsAppButton";
 import { Home } from "./pages/Home";
 import { About } from "./pages/About";
+import { Customize } from "./pages/Customize";
 
 // Scroll to top on route change
 function ScrollToTop() {
@@ -34,6 +35,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
+            <Route path="/customize" element={<Customize />} />
           </Routes>
         </div>
         <Footer />
