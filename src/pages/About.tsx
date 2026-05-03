@@ -34,7 +34,7 @@ export function About() {
               Born from Passion.<br />Built on Craft.
             </h1>
             <p className="text-white/75 text-lg md:text-xl font-light max-w-2xl mx-auto">
-              Since 2008, we've been turning moments into masterpieces — one frame at a time.
+              Welcome to Ezzi Arts & Frames, where you can trust that you are being served with the highest quality of designs to capture your precious memories and beloved artworks. Experience the joy of framing and preserving eternal moments.
             </p>
           </motion.div>
         </div>
@@ -71,13 +71,10 @@ export function About() {
               </h2>
               <div className="space-y-6 text-gray-600 leading-relaxed text-lg">
                 <p>
-                  In 2008, two men who had spent their lives surrounded by wood, glass, and gold walked into a workshop in Mumbai with a vision. Ali Patanwala and Murtuza Ratlamwala had each spent over a decade in the framing industry — but separately. When they came together, something rare happened: craft met commerce, and passion found purpose.
+                  When Mr Aliasger Patanwala founded Ezzi Arts & Frames in 2008, he had been working in the field for nearly 2 decades, achieving an expertise that only time, honesty and dedication to the craft can extend.
                 </p>
                 <p>
-                  Ezzi Arts & Frames wasn't born to just sell picture frames. It was built to create objects that outlive the moment — frames that hold a photograph long after the memory fades, that decorate a home for a lifetime, that carry the weight of what matters most.
-                </p>
-                <p>
-                  Today, Ezzi is among the leading names in India's framing industry. The designs we pioneered are now emulated. The standards we set are now benchmarks. But the dream is still the same.
+                  Today, Ezzi Arts & Frames have became a pioneer in the framing industry. In the past two decades, we have expanded to Asia, the Gulf and Europe. We serve customers across India, the UAE and the UK, and bring a bespoke elegance into their homes.
                 </p>
               </div>
             </motion.div>
@@ -100,15 +97,15 @@ export function About() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {[
               {
-                name: "Ali Patanwala",
-                title: "Co-Founder & Creative Director",
-                desc: "With over two decades in the framing industry, Ali is the creative soul of Ezzi. His relentless pursuit of design excellence has led to countless industry-firsts — from international conventions to innovations that have set new standards across India's framing market.",
+                name: "Aliasger Patanwala",
+                title: "Founder",
+                desc: "With over two decades in the framing industry, Mr Aliasger Patanwala is the heart and soul of Ezzi Arts & Frames. He brings an attention to detail that can be rivalled by only a few. His dedication to the craft has lent Ezzi Arts & Frames the excellence that it brings.",
                 img: "https://zpojmqmlenivqxqcsuwc.supabase.co/storage/v1/object/public/Stalite%20Media/ezzi%20Arts/Founders/Ali-patanwala.jpg"
               },
               {
-                name: "Murtuza Ratlamwala",
-                title: "Co-Founder & Operations Director",
-                desc: "Murtuza is the backbone of everything Ezzi delivers. His deep industry relationships, precision in operations, and commitment to quality ensure that every frame that leaves our workshop is exactly what was promised — and more.",
+                name: "Abdulkadir Patanwala",
+                title: "Director",
+                desc: "Abdulkadir Patanwala is the young mind behind expanding Ezzi Arts & Frames along with his father. His grit and intelligence have been shaping Ezzi Arts & Frames into a household name thanks to his tech-savvy and adaptable mindset.",
                 img: "https://zpojmqmlenivqxqcsuwc.supabase.co/storage/v1/object/public/Stalite%20Media/ezzi%20Arts/Founders/Murtuza-Ratlamwala.jpg"
               }
             ].map((founder, idx) => (
@@ -155,12 +152,12 @@ export function About() {
 
             <div className="space-y-16">
               {[
-                { year: "1950s", text: "The first photo frame manufacturers emerge in India, hiring labourers in a nascent industry with little awareness of art." },
-                { year: "Early 2000s", text: "Technology begins replacing manual labour. Skilled artisans enter the industry. Quality rises." },
-                { year: "2008", text: "Ezzi Arts & Frames is founded by Ali Patanwala and Murtuza Ratlamwala in Mumbai. A new benchmark is set." },
-                { year: "2010s", text: "Ezzi pioneers industry-firsts: international conventions, structured sales contests, emulated design standards." },
-                { year: "2020s", text: "India's framing industry crosses ₹20 Crore in annual revenue. Ezzi leads the charge — exporting to 10+ countries including USA, UK, and Australia." },
-                { year: "Today", text: "Lakhs of frames sold. 100+ design options. Trusted by Reliance, Taj Hotels, Abbott, and India's finest." }
+                { year: "1950s", text: "The first photo frame manufacturers emerged in India." },
+                { year: "1990s", text: "Mr Aliasger Patanwala joined the nuanced industry" },
+                { year: "2008", text: "Mr Aliasger Patanwala launched Ezzi Arts & Frames with the support of his incredible wife, Nisreen Patanwala and his trustworthy companion, Mr Murtaza Ratlamwala" },
+                { year: "2010s", text: "Ezzi Arts & Frames expanded all over India, and became a leading manufacturer, importer and specialist in the framing world." },
+                { year: "2020s", text: "Ezzi Arts & Frames opened their doors internationally in Dubai and London" },
+                { year: "2025", text: "Mr Abdulkadir Patanwala stepped in as the Director of Ezzi Arts & Frames" }
               ].map((item, idx) => (
                 <motion.div 
                   key={idx}
@@ -206,10 +203,13 @@ export function About() {
               </h2>
               <div className="space-y-6 text-gray-600 leading-relaxed text-lg mb-10">
                 <p>
-                  Our frames aren't just manufactured — they're engineered to last. Sustainable materials, superior build quality, termite resistance, moisture resistance. But beyond the technical, there's something more: a design sensibility that comes from loving the craft.
+                  Our frames aren't just made for show, they're engineered to last. Every frame that you purchase at Ezzi Arts & Frames is made of sustainable materials, of superior quality, termite-resistant, and moisture-resistant.
                 </p>
                 <p>
-                  We are tied up with one of the world's largest framing companies for over a decade — importing and supplying mount boards, prints, accessories, and machinery that allow us to create frames that feel truly international, while remaining proudly Indian.
+                  With more than 2000+ design choices, our frames have something for everyone in store.
+                </p>
+                <p>
+                  We have been tied up with one of the world's largest framing companies for over a decade — importing and supplying mount boards, prints, accessories, and machinery that allow us to create frames that feel truly international, while remaining proudly Indian.
                 </p>
               </div>
               
@@ -241,12 +241,11 @@ export function About() {
       {/* SECTION 6 — STATS BAR */}
       <section className="bg-gold-light py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-white/30">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-white/30">
             {[
-              { num: "1 Lakh+", label: "Frames Sold" },
-              { num: "100+", label: "Design Options" },
+              { num: "2000+", label: "Design Choices" },
               { num: "15+", label: "Years of Experience" },
-              { num: "10+", label: "Countries" },
+              { num: "10+", label: "Countries Served" },
             ].map((stat, idx) => (
               <motion.div
                 key={idx}
