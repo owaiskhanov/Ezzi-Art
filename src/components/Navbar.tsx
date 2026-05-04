@@ -50,7 +50,7 @@ export function Navbar() {
             "font-serif font-bold text-xl tracking-wide transition-colors",
             isTransparent ? "text-white" : "text-charcoal"
           )}>
-            EZZI ARTS
+            EZZI ARTS & FRAMES
           </span>
         </Link>
 

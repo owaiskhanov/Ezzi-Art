@@ -106,7 +106,7 @@ export function About() {
                 name: "Abdulkadir Patanwala",
                 title: "Director",
                 desc: "Abdulkadir Patanwala is the young mind behind expanding Ezzi Arts & Frames along with his father. His grit and intelligence have been shaping Ezzi Arts & Frames into a household name thanks to his tech-savvy and adaptable mindset.",
-                img: "https://zpojmqmlenivqxqcsuwc.supabase.co/storage/v1/object/public/Stalite%20Media/ezzi%20Arts/Founders/Murtuza-Ratlamwala.jpg"
+                img: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Founder/Abdul-Kadir-Patanwala.jpg"
               }
             ].map((founder, idx) => (
               <motion.div
@@ -121,7 +121,7 @@ export function About() {
                   <img 
                     src={founder.img} 
                     alt={founder.name} 
-                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                    className="w-full h-full object-cover md:grayscale hover:grayscale-0 transition-all duration-500"
                     referrerPolicy="no-referrer"
                   />
                 </div>
