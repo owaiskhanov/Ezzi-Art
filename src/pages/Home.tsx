@@ -131,7 +131,7 @@ export function Home() {
               <span className="italic font-light text-white/90">Moments</span>
             </motion.h1>
             <motion.p variants={fadeInUp} className="text-white/80 text-lg md:text-xl font-light max-w-2xl mx-auto mb-12 leading-relaxed">
-              Where every memory finds its perfect home — crafted with two decades of artistry and uncompromising precision.
+              Where every memory finds the perfect frame, crafted with two decades of dedication and artistry precision
             </motion.p>
             
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-6 w-full sm:w-auto">
@@ -381,9 +381,6 @@ export function Home() {
               Looking for an unforgettable <br className="hidden md:block" />
               <span className="text-gold-light italic">framing experience</span>
             </motion.h2>
-            <motion.p variants={fadeInUp} className="text-white/70 text-lg md:text-xl mb-12 font-light max-w-2xl mx-auto">
-              High-quality, designer picture frames crafted to inspire. Let's bring your vision to life.
-            </motion.p>
             <motion.div variants={fadeInUp}>
               <Link 
                 to="/#contact" 
