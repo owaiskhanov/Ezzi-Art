@@ -128,7 +128,7 @@ export function Home() {
             </motion.span>
             <motion.h1 variants={fadeInUp} className="text-white text-5xl md:text-7xl lg:text-8xl font-serif leading-[1.1] mb-8 tracking-tight drop-shadow-lg">
               Framing Your Best <br className="hidden md:block" />
-              <span className="italic font-light text-white/90">Moments & Legacy</span>
+              <span className="italic font-light text-white/90">Moments</span>
             </motion.h1>
             <motion.p variants={fadeInUp} className="text-white/80 text-lg md:text-xl font-light max-w-2xl mx-auto mb-12 leading-relaxed">
               Where every memory finds its perfect home — crafted with two decades of artistry and uncompromising precision.
@@ -173,11 +173,11 @@ export function Home() {
               ABOUT THE BRAND
             </motion.span>
             <motion.h2 variants={fadeInUp} className="text-4xl md:text-6xl font-serif text-charcoal mb-10 leading-tight">
-              Leaders in India's <br className="hidden md:block" />
+              Leading the <br className="hidden md:block" />
               <span className="italic text-gray-500 font-light">Framing Industry</span>
             </motion.h2>
             <motion.p variants={fadeInUp} className="text-gray-600 text-lg md:text-xl leading-relaxed mb-12 font-light">
-              Founded in 2008 by Ali Patanwala and Murtuza Ratlamwala — two craftsmen with over two decades of combined experience — Ezzi Arts & Frames was built on one belief: that the moments you love most deserve to live in something beautiful, durable, and lasting. Since then, we've become one of India's most trusted names in premium framing.
+              Founded in 2008 by Mr. Aliasger Patanwala. Ezzi Arts & Frames was built on one belief: that the moments you love most deserve to live in something beautiful, durable, and lasting. Since then, we've become one of India's most trusted names in premium framing. Today we are leading photoframe manufacturers across Asia, the Gulf and The UK.
             </motion.p>
             <motion.div variants={fadeInUp}>
               <Link 
@@ -378,8 +378,8 @@ export function Home() {
             variants={staggerContainer}
           >
             <motion.h2 variants={fadeInUp} className="text-4xl md:text-6xl lg:text-7xl font-serif text-white mb-8 leading-tight">
-              Looking for a First-Class <br className="hidden md:block" />
-              <span className="text-gold-light italic">Framing Experience?</span>
+              Looking for an unforgettable <br className="hidden md:block" />
+              <span className="text-gold-light italic">framing experience</span>
             </motion.h2>
             <motion.p variants={fadeInUp} className="text-white/70 text-lg md:text-xl mb-12 font-light max-w-2xl mx-auto">
               High-quality, designer picture frames crafted to inspire. Let's bring your vision to life.
