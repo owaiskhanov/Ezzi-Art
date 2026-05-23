@@ -7,7 +7,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col items-center mb-16">
           <img 
-            src="https://zpojmqmlenivqxqcsuwc.supabase.co/storage/v1/object/public/Stalite%20Media/ezzi%20Arts/Logo/Ezzi%20logo.png" 
+            src="https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Logo/logo.svg" 
             alt="Ezzi Arts & Frames" 
             className="h-16 mb-6"
             referrerPolicy="no-referrer"

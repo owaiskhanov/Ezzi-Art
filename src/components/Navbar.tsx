@@ -41,7 +41,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3 z-50">
           <img 
-            src="https://zpojmqmlenivqxqcsuwc.supabase.co/storage/v1/object/public/Stalite%20Media/ezzi%20Arts/Logo/Ezzi%20logo.png" 
+            src="https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Logo/logo.svg" 
             alt="Ezzi Arts & Frames" 
             className={cn("h-10 transition-all", isTransparent ? "brightness-0 invert" : "")}
             referrerPolicy="no-referrer"
