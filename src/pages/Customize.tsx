@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets } from "lucide-react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "motion/react";
+import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
 
@@ -73,6 +73,64 @@ export function Customize() {
   const [wallColor, setWallColor] = useState(WALL_COLORS[1]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // AR State
+  const [isARMode, setIsARMode] = useState(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+
+  // Smart Resize State
+  const [naturalAspectRatio, setNaturalAspectRatio] = useState<number | null>(null);
+
+  // 3D Rotation State
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [15, -15]), { stiffness: 150, damping: 20 });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-15, 15]), { stiffness: 150, damping: 20 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!previewContainerRef.current) return;
+    const rect = previewContainerRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
+  const toggleARMode = async () => {
+    if (isARMode) {
+      stream?.getTracks().forEach(track => track.stop());
+      setStream(null);
+      setIsARMode(false);
+    } else {
+      try {
+        const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        setStream(s);
+        setIsARMode(true);
+      } catch (err) {
+        alert("Camera permission denied or not available. Please allow camera access to use AR mode.");
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream, isARMode]);
+
+  useEffect(() => {
+    return () => {
+      // Clean up camera on unmount
+      if (stream) stream.getTracks().forEach(track => track.stop());
+    }
+  }, [stream]);
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -148,10 +206,22 @@ export function Customize() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result as string);
+        const result = reader.result as string;
+        setImage(result);
+        const img = new Image();
+        img.onload = () => {
+          setNaturalAspectRatio(img.naturalWidth / img.naturalHeight);
+        };
+        img.src = result;
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const applySmartResize = () => {
+    if (!naturalAspectRatio) return;
+    const newHeight = Math.round(artWidth / naturalAspectRatio);
+    setArtHeight(Math.max(4, newHeight));
   };
 
   const handleReset = () => {
@@ -185,16 +255,35 @@ export function Customize() {
   }, [artWidth, artHeight]);
 
   return (
-    <main className="h-[100dvh] pt-[72px] lg:pt-20 bg-gray-50 flex flex-col overflow-hidden">
+    <main className="flex-1 flex flex-col min-h-0 bg-gray-50 overflow-hidden">
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         
         {/* Preview Area (Left) */}
         <div 
-          className="h-[40vh] lg:h-auto lg:flex-1 relative flex items-center justify-center p-4 lg:p-12 transition-colors duration-500 overflow-hidden shrink-0"
-          style={{ backgroundColor: wallColor.color }}
+          ref={previewContainerRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          className="h-[45vh] lg:h-auto lg:flex-1 relative flex items-center justify-center p-4 lg:p-12 overflow-hidden shrink-0"
+          style={{ 
+            backgroundColor: isARMode ? 'transparent' : wallColor.color,
+            transition: 'background-color 0.5s ease',
+            perspective: '1200px'
+          }}
         >
-          {/* Subtle Wall Texture Overlay */}
-          <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" 
+          {/* AR Video Background */}
+          <video 
+            ref={videoRef}
+            autoPlay 
+            playsInline 
+            muted
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-700",
+              isARMode ? "opacity-100" : "opacity-0"
+            )}
+          />
+
+          {/* Subtle Wall Texture Overlay (Only if not AR) */}
+          <div className={cn("absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none transition-opacity", isARMode ? "opacity-0" : "opacity-[0.03]")}
                style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/stucco.png")' }}></div>
           
           <AnimatePresence mode="wait">
@@ -205,29 +294,36 @@ export function Customize() {
                 animate={{ opacity: 1, scale: frameScale }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.4 }}
-                className="relative shadow-2xl transition-all duration-300 max-w-full max-h-full flex items-center justify-center shrink-0"
+                className="relative shadow-2xl inline-flex items-center justify-center shrink-0 z-10"
                 style={{ 
+                  rotateX,
+                  rotateY,
                   backgroundColor: frameStyle.color,
                   backgroundImage: frameStyle.texture ? `url(${frameStyle.texture})` : undefined,
                   backgroundSize: 'cover',
                   padding: frameThickness.value,
                   // Add subtle inner and outer shadows to the frame
-                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(0,0,0,0.5)'
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), inset 0 3px 15px rgba(0,0,0,0.6)',
+                  maxWidth: '90%',
+                  maxHeight: '90%',
+                  transformStyle: 'preserve-3d'
                 }}
               >
                 {/* Wood Grain Texture Overlay for Frame */}
                 {frameStyle.material === 'wood' && !frameStyle.texture && (
                    <div className="absolute inset-0 opacity-20 pointer-events-none" 
-                        style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")' }} />
+                        style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', transform: 'translateZ(1px)' }} />
                 )}
 
                 <div 
-                  className="relative transition-all duration-300 shrink-0"
+                  className="relative shrink-0 inline-flex"
                   style={{
                     backgroundColor: matColor.color,
                     padding: matSize.value,
                     // Inner shadow on mat simulating depth
-                    boxShadow: 'inset 0px 4px 15px rgba(0,0,0,0.15), 0 2px 10px rgba(0,0,0,0.6)'
+                    boxShadow: 'inset 0px 4px 15px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.5)',
+                    transform: 'translateZ(10px)',
+                    transformStyle: 'preserve-3d'
                   }}
                 >
                   {/* Subtle Mat Texture */}
@@ -236,19 +332,26 @@ export function Customize() {
 
                   {/* Glass Reflection effect if Museum/Standard isn't selected */}
                   {glassType.id !== 'museum' && glassType.id !== 'non-glare' && (
-                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 pointer-events-none z-10" />
+                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 pointer-events-none z-10" 
+                          style={{ transform: 'translateZ(15px)' }}/>
                   )}
 
                   <div 
-                    className="relative bg-white overflow-hidden flex items-center justify-center shrink-0"
+                    className="relative bg-white overflow-hidden shrink-0"
                     style={{
-                      boxShadow: 'inset 0 0 10px rgba(0,0,0,0.1), 0 4px 15px rgba(0,0,0,0.3)'
+                      boxShadow: 'inset 0 0 10px rgba(0,0,0,0.1), 0 4px 15px rgba(0,0,0,0.3)',
+                      transform: 'translateZ(5px)'
                     }}
                   >
                     <img 
                       src={image} 
                       alt="Your Art" 
-                      className="object-contain max-w-full max-h-[35vh] lg:max-h-[60vh] align-bottom"
+                      className="block object-cover"
+                      style={{
+                        aspectRatio: `${artWidth} / ${artHeight}`,
+                        maxHeight: '55vh',
+                        maxWidth: 'min(80vw, 500px)'
+                      }}
                     />
                   </div>
                 </div>
@@ -295,6 +398,14 @@ export function Customize() {
                       title="Reset all choices"
                     >
                       <RotateCcw className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={toggleARMode}
+                      className={cn("p-1.5 rounded-full transition-colors flex items-center gap-1.5 text-xs font-medium ml-2", isARMode ? "bg-charcoal text-white" : "bg-blue-50 text-blue-600 hover:bg-blue-100")}
+                      title="View in AR"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      {isARMode ? 'AR On' : 'AR View'}
                     </button>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">{image ? 'Custom image loaded' : 'No image selected'}</p>
@@ -365,7 +476,7 @@ export function Customize() {
           </div>
 
           {/* Tab Content */}
-          <div className="p-6 flex-1 overflow-y-auto">
+          <div className="p-6 flex-1 overflow-y-auto min-h-0 bg-gray-50/30">
             <AnimatePresence mode="wait">
               
               {/* SIZE TAB */}
@@ -378,30 +489,71 @@ export function Customize() {
                   transition={{ duration: 0.2 }}
                   className="space-y-8"
                 >
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Standard Sizes</h3>
-                    <p className="text-sm text-gray-500 mb-6 font-light">Select from our ready-to-hang standard market sizes.</p>
-                    
-                    <div className="grid grid-cols-2 gap-3">
-                      {STANDARD_SIZES.map(size => (
-                        <button
-                          key={size.id}
-                          onClick={() => {
-                            setArtWidth(size.width);
-                            setArtHeight(size.height);
-                          }}
-                          className={cn(
-                            "flex flex-col items-center p-4 border transition-all rounded",
-                            artWidth === size.width && artHeight === size.height 
-                              ? "border-charcoal bg-gray-50 ring-1 ring-charcoal/20" 
-                              : "border-gray-200 hover:border-gray-300 bg-white"
-                          )}
-                        >
-                          <span className={cn("text-lg font-medium", artWidth === size.width && artHeight === size.height ? "text-charcoal" : "text-gray-700")}>
-                            {size.name}
-                          </span>
-                        </button>
-                      ))}
+                  <div className="space-y-8">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wider">Custom Size</h3>
+                        {naturalAspectRatio && image && (
+                          <button 
+                            onClick={applySmartResize}
+                            className="flex items-center gap-1.5 text-xs font-semibold text-charcoal bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded transition-colors"
+                          >
+                            <Wand2 className="w-3.5 h-3.5" />
+                            Smart Crop
+                          </button>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Width (in)</label>
+                          <input 
+                            type="number" 
+                            min="4" max="60"
+                            value={artWidth}
+                            onChange={(e) => setArtWidth(Math.max(4, Number(e.target.value)))}
+                            className="w-full border border-gray-200 rounded p-3 text-center focus:outline-none focus:ring-1 focus:ring-charcoal focus:border-charcoal transition-all text-lg font-medium"
+                          />
+                        </div>
+                        <div className="text-gray-300 font-light text-2xl mt-6">×</div>
+                        <div className="flex-1">
+                          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Height (in)</label>
+                          <input 
+                            type="number" 
+                            min="4" max="60"
+                            value={artHeight}
+                            onChange={(e) => setArtHeight(Math.max(4, Number(e.target.value)))}
+                            className="w-full border border-gray-200 rounded p-3 text-center focus:outline-none focus:ring-1 focus:ring-charcoal focus:border-charcoal transition-all text-lg font-medium"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-gray-100 pt-8">
+                      <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Standard Sizes</h3>
+                      <p className="text-sm text-gray-500 mb-6 font-light">Select from our ready-to-hang standard market sizes.</p>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        {STANDARD_SIZES.map(size => (
+                          <button
+                            key={size.id}
+                            onClick={() => {
+                              setArtWidth(size.width);
+                              setArtHeight(size.height);
+                            }}
+                            className={cn(
+                              "flex flex-col items-center p-4 border transition-all rounded",
+                              artWidth === size.width && artHeight === size.height 
+                                ? "border-charcoal bg-gray-50 ring-1 ring-charcoal/20" 
+                                : "border-gray-200 hover:border-gray-300 bg-white"
+                            )}
+                          >
+                            <span className={cn("text-lg font-medium", artWidth === size.width && artHeight === size.height ? "text-charcoal" : "text-gray-700")}>
+                              {size.name}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </motion.div>

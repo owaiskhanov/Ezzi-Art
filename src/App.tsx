@@ -25,22 +25,31 @@ function ScrollToTop() {
   return null;
 }
 
+function Layout() {
+  const location = useLocation();
+  const isCustomizePage = location.pathname === '/customize';
+
+  return (
+    <div className={isCustomizePage ? "h-[100dvh] flex flex-col font-sans text-charcoal bg-white overflow-hidden" : "min-h-screen flex flex-col font-sans text-charcoal bg-white"}>
+      {!isCustomizePage && <Navbar />}
+      <div className="flex-1 flex flex-col min-h-0">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/customize" element={<Customize />} />
+        </Routes>
+      </div>
+      {!isCustomizePage && <Footer />}
+      {!isCustomizePage && <WhatsAppButton />}
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen flex flex-col font-sans text-charcoal bg-white">
-        <Navbar />
-        <div className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/customize" element={<Customize />} />
-          </Routes>
-        </div>
-        <Footer />
-        <WhatsAppButton />
-      </div>
+      <Layout />
     </Router>
   );
 }
