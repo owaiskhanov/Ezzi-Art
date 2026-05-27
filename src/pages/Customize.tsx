@@ -179,36 +179,18 @@ export function Customize() {
     `Please confirm the next steps to proceed with payment.`
   );
 
-  return (
-    <main className="min-h-screen bg-gray-50 flex flex-col pt-20">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="text-gray-500 hover:text-charcoal transition-colors p-2 -ml-2 rounded-full hover:bg-gray-100">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <h1 className="text-xl font-serif text-charcoal font-semibold">Frame Studio</h1>
-            <p className="text-xs text-gray-500 font-medium tracking-widest uppercase">Place Your Order</p>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={handleReset}
-            className="hidden sm:flex items-center gap-2 text-sm text-gray-500 hover:text-charcoal transition-colors px-3 py-2"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Reset
-          </button>
-        </div>
-      </header>
+  const frameScale = useMemo(() => {
+    const area = artWidth * artHeight;
+    return Math.min(1.05, Math.max(0.65, 0.65 + (area / 3000)));
+  }, [artWidth, artHeight]);
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+  return (
+    <main className="h-[100dvh] pt-[72px] lg:pt-20 bg-gray-50 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         
         {/* Preview Area (Left) */}
         <div 
-          className="flex-1 relative flex items-center justify-center p-8 lg:p-12 transition-colors duration-500 overflow-hidden min-h-[50vh] lg:min-h-0"
+          className="h-[40vh] lg:h-auto lg:flex-1 relative flex items-center justify-center p-4 lg:p-12 transition-colors duration-500 overflow-hidden shrink-0"
           style={{ backgroundColor: wallColor.color }}
         >
           {/* Subtle Wall Texture Overlay */}
@@ -219,9 +201,9 @@ export function Customize() {
             {image ? (
               <motion.div 
                 key="frame-preview"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: frameScale }}
+                exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.4 }}
                 className="relative shadow-2xl transition-all duration-300 max-w-full max-h-full flex items-center justify-center shrink-0"
                 style={{ 
@@ -266,7 +248,7 @@ export function Customize() {
                     <img 
                       src={image} 
                       alt="Your Art" 
-                      className="object-contain max-w-full max-h-[50vh] lg:max-h-[60vh] align-bottom"
+                      className="object-contain max-w-full max-h-[35vh] lg:max-h-[60vh] align-bottom"
                     />
                   </div>
                 </div>
@@ -299,13 +281,22 @@ export function Customize() {
         </div>
 
         {/* Controls Area (Right) */}
-        <div className="w-full lg:w-[450px] bg-white border-l border-gray-200 flex flex-col h-[50vh] lg:h-auto overflow-y-auto z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.03)] shrink-0">
+        <div className="w-full lg:w-[450px] bg-white border-l border-gray-200 flex flex-col flex-1 lg:flex-none lg:h-full overflow-hidden z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.03)] shrink-0">
           
           {/* Active Image Status */}
-          <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+          <div className="p-4 border-b border-gray-100 bg-gray-50/50 shrink-0">
              <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-charcoal">Artwork Overview</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-charcoal">Artwork Overview</h3>
+                    <button 
+                      onClick={handleReset} 
+                      className="text-gray-400 hover:text-charcoal p-1 rounded-full hover:bg-gray-200 transition-colors"
+                      title="Reset all choices"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                    </button>
+                  </div>
                   <p className="text-xs text-gray-500 mt-1">{image ? 'Custom image loaded' : 'No image selected'}</p>
                 </div>
                 <button 
@@ -325,7 +316,7 @@ export function Customize() {
           </div>
 
           {/* Navigation Tabs (Scrollable) */}
-          <div className="flex overflow-x-auto border-b border-gray-200 sticky top-0 bg-white z-10 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex overflow-x-auto border-b border-gray-200 bg-white z-10 shrink-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <button 
               onClick={() => setActiveTab('size')}
               className={cn(
@@ -620,7 +611,7 @@ export function Customize() {
           </div>
 
           {/* Details Summary Footer */}
-          <div className="p-5 bg-white border-t border-gray-200 mt-auto shadow-[0_-10px_20px_rgba(0,0,0,0.02)] relative z-30">
+          <div className="p-4 lg:p-5 bg-white border-t border-gray-200 mt-auto shadow-[0_-10px_20px_rgba(0,0,0,0.02)] relative z-30 shrink-0">
             <div className="flex items-end justify-between mb-4">
               <div>
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Estimated Total</h4>
