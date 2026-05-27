@@ -1,56 +1,438 @@
-import { motion } from "motion/react";
+import React, { useState, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag } from "lucide-react";
 import { Link } from "react-router-dom";
+import { cn } from "../lib/utils";
+
+const FRAME_STYLES = [
+  { id: 'black', name: 'Black Wood', color: '#1a1a1a' },
+  { id: 'walnut', name: 'Walnut Wood', color: '#4a3320' },
+  { id: 'natural', name: 'Natural Oak', color: '#c7b39a' },
+  { id: 'gold', name: 'Vintage Gold', color: '#bfa15f' },
+  { id: 'silver', name: 'Brushed Silver', color: '#e0e0e0' },
+  { id: 'white', name: 'Gallery White', color: '#f5f5f5' },
+];
+
+const FRAME_THICKNESS = [
+  { id: 'thin', name: 'Thin (0.75")', value: '12px' },
+  { id: 'standard', name: 'Standard (1.5")', value: '24px' },
+  { id: 'thick', name: 'Thick (2.5")', value: '40px' },
+];
+
+const MAT_COLORS = [
+  { id: 'white', name: 'Optic White', color: '#ffffff' },
+  { id: 'cream', name: 'Warm Cream', color: '#fcfaf5' },
+  { id: 'black', name: 'Deep Black', color: '#111111' },
+];
+
+const MAT_SIZES = [
+  { id: 'none', name: 'No Mat', value: '0px' },
+  { id: 'small', name: '1.5" Small', value: '24px' },
+  { id: 'medium', name: '3" Medium', value: '48px' },
+  { id: 'large', name: '5" Large', value: '80px' },
+];
+
+const WALL_COLORS = [
+  { id: 'white', name: 'White', color: '#ffffff' },
+  { id: 'gray', name: 'Gallery Gray', color: '#e5e7eb' },
+  { id: 'sage', name: 'Sage Green', color: '#b9c1b7' },
+  { id: 'navy', name: 'Navy Blue', color: '#1e293b' },
+];
 
 export function Customize() {
+  const [activeTab, setActiveTab] = useState<'frame' | 'mat' | 'wall'>('frame');
+  
+  // Customization State
+  const [image, setImage] = useState<string | null>(null);
+  const [frameStyle, setFrameStyle] = useState(FRAME_STYLES[0]);
+  const [frameThickness, setFrameThickness] = useState(FRAME_THICKNESS[1]);
+  const [matColor, setMatColor] = useState(MAT_COLORS[0]);
+  const [matSize, setMatSize] = useState(MAT_SIZES[2]);
+  const [wallColor, setWallColor] = useState(WALL_COLORS[1]);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleReset = () => {
+    setImage(null);
+    setFrameStyle(FRAME_STYLES[0]);
+    setFrameThickness(FRAME_THICKNESS[1]);
+    setMatColor(MAT_COLORS[0]);
+    setMatSize(MAT_SIZES[2]);
+    setWallColor(WALL_COLORS[1]);
+  };
+
   return (
-    <main className="w-full min-h-screen bg-charcoal relative flex flex-col items-center justify-center overflow-hidden">
-      {/* Background Image / Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1544457070-4cd773b4d71e?q=80&w=2000&auto=format&fit=crop" 
-          alt="Customize Frame Background" 
-          className="w-full h-full object-cover opacity-30 mix-blend-overlay grayscale"
-          referrerPolicy="no-referrer"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/80 to-transparent" />
-      </div>
-
-      <motion.div 
-        className="relative z-10 max-w-4xl mx-auto px-6 text-center pt-24"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        <span className="text-gold-light text-sm font-medium tracking-[0.3em] uppercase mb-6 block">
-          Interactive Design Studio
-        </span>
-        <h1 className="text-white text-5xl md:text-7xl font-serif leading-tight mb-8">
-          Customize Your <br className="hidden md:block"/>
-          <span className="italic text-gray-400 font-light">Frame</span>
-        </h1>
-        
-        <p className="text-white/70 text-lg md:text-xl font-light max-w-2xl mx-auto mb-12 leading-relaxed">
-          We are building an immersive experience that lets you upload your art, mix and match premium frames, test matting options, and see the final piece before it is handcrafted.
-        </p>
-
-        <div className="inline-flex flex-col items-center justify-center">
-          <div className="w-16 h-[1px] bg-gold-light mb-8" />
-          <h2 className="text-3xl md:text-4xl font-serif text-white tracking-widest uppercase opacity-90 drop-shadow-lg">
-            Coming Soon
-          </h2>
-          <div className="w-16 h-[1px] bg-gold-light mt-8" />
-        </div>
-
-        <div className="mt-16">
-          <Link 
-            to="/" 
-            className="inline-flex items-center text-gold-light font-medium uppercase tracking-[0.15em] text-xs pb-2 border-b border-gold-light/30 hover:border-gold-light transition-colors"
-          >
-            <span className="mr-3 transform group-hover:-translate-x-2 transition-transform duration-300">←</span>
-            Back to Home
+    <main className="min-h-screen bg-gray-50 flex flex-col pt-20">
+      
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+        <div className="flex items-center gap-4">
+          <Link to="/" className="text-gray-500 hover:text-charcoal transition-colors p-2 -ml-2 rounded-full hover:bg-gray-100">
+            <ArrowLeft className="w-5 h-5" />
           </Link>
+          <div>
+            <h1 className="text-xl font-serif text-charcoal font-semibold">Frame Studio</h1>
+            <p className="text-xs text-gray-500 font-medium tracking-widest uppercase">Interactive Visualizer</p>
+          </div>
         </div>
-      </motion.div>
+        
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleReset}
+            className="hidden sm:flex items-center gap-2 text-sm text-gray-500 hover:text-charcoal transition-colors px-3 py-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Reset
+          </button>
+          <a 
+            href="https://wa.me/91XXXXXXXXXX" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-charcoal text-white px-5 py-2.5 rounded-none text-sm font-medium tracking-wide hover:bg-charcoal/90 transition-colors flex items-center gap-2"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Request Quote
+          </a>
+        </div>
+      </header>
+
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        
+        {/* Preview Area (Left) */}
+        <div 
+          className="flex-1 relative flex items-center justify-center p-8 lg:p-12 transition-colors duration-500 overflow-hidden min-h-[50vh] lg:min-h-0"
+          style={{ backgroundColor: wallColor.color }}
+        >
+          {/* Subtle Wall Texture Overlay */}
+          <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" 
+               style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/stucco.png")' }}></div>
+          
+          <AnimatePresence mode="wait">
+            {image ? (
+              <motion.div 
+                key="frame-preview"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.4 }}
+                className="relative shadow-2xl transition-all duration-300 max-w-full max-h-full flex items-center justify-center shrink-0"
+                style={{ 
+                  backgroundColor: frameStyle.color,
+                  padding: frameThickness.value,
+                  // Add subtle inner and outer shadows to the frame
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(0,0,0,0.5)'
+                }}
+              >
+                {/* Wood Grain Texture Overlay for Frame */}
+                {['walnut', 'natural', 'black'].includes(frameStyle.id) && (
+                   <div className="absolute inset-0 opacity-20 pointer-events-none" 
+                        style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")' }} />
+                )}
+
+                <div 
+                  className="relative transition-all duration-300 shrink-0"
+                  style={{
+                    backgroundColor: matColor.color,
+                    padding: matSize.value,
+                    // Inner shadow on mat simulating depth
+                    boxShadow: 'inset 0px 4px 15px rgba(0,0,0,0.15), 0 2px 10px rgba(0,0,0,0.6)'
+                  }}
+                >
+                  {/* Subtle Mat Texture */}
+                  <div className="absolute inset-0 opacity-[0.04] pointer-events-none" 
+                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/paper.png")' }} />
+
+                  <div 
+                    className="relative bg-white overflow-hidden flex items-center justify-center shrink-0"
+                    style={{
+                      boxShadow: 'inset 0 0 10px rgba(0,0,0,0.1), 0 4px 15px rgba(0,0,0,0.3)'
+                    }}
+                  >
+                    <img 
+                      src={image} 
+                      alt="Your Art" 
+                      className="object-contain max-w-full max-h-[50vh] lg:max-h-[60vh] align-bottom"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div 
+                key="upload-prompt"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center justify-center text-center max-w-md w-full bg-white/80 backdrop-blur-sm p-12 rounded-xl shadow-xl border border-white/20 relative z-10"
+              >
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6 text-gray-400">
+                  <ImageIcon className="w-10 h-10" />
+                </div>
+                <h2 className="text-2xl font-serif text-charcoal mb-3">See Your Art Framed</h2>
+                <p className="text-gray-500 mb-8 font-light text-center">
+                  Upload a photo of your artwork or picture to visualize how it looks with our premium frames and matting.
+                </p>
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-charcoal text-white px-8 py-3.5 rounded-none font-medium tracking-wide hover:bg-charcoal/90 transition-all shadow-md hover:shadow-lg flex items-center gap-3 w-full justify-center"
+                >
+                  <Upload className="w-5 h-5" />
+                  Upload Photo
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Controls Area (Right) */}
+        <div className="w-full lg:w-[450px] bg-white border-l border-gray-200 flex flex-col h-[50vh] lg:h-auto overflow-y-auto z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.03)]">
+          
+          {/* Active Image Status */}
+          <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+             <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-charcoal">Artwork</h3>
+                  <p className="text-xs text-gray-500 mt-1">{image ? 'Custom image loaded' : 'No image selected'}</p>
+                </div>
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-xs font-medium bg-white border border-gray-200 px-3 py-1.5 rounded text-charcoal hover:bg-gray-50 transition-colors shadow-sm"
+                >
+                  {image ? 'Change' : 'Upload'}
+                </button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleImageUpload} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+             </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="flex border-b border-gray-200 sticky top-0 bg-white z-10">
+            <button 
+              onClick={() => setActiveTab('frame')}
+              className={cn(
+                "flex-1 py-4 text-sm font-medium transition-colors border-b-2 flex items-center justify-center gap-2",
+                activeTab === 'frame' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
+              )}
+            >
+              <Frame className="w-4 h-4" /> Frame
+            </button>
+            <button 
+              onClick={() => setActiveTab('mat')}
+              className={cn(
+                "flex-1 py-4 text-sm font-medium transition-colors border-b-2 flex items-center justify-center gap-2",
+                activeTab === 'mat' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
+              )}
+            >
+              <Ruler className="w-4 h-4" /> Matting
+            </button>
+            <button 
+              onClick={() => setActiveTab('wall')}
+              className={cn(
+                "flex-1 py-4 text-sm font-medium transition-colors border-b-2 flex items-center justify-center gap-2",
+                activeTab === 'wall' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
+              )}
+            >
+              <Palette className="w-4 h-4" /> Wall
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-6 flex-1 overflow-y-auto">
+            <AnimatePresence mode="wait">
+              
+              {/* FRAME TAB */}
+              {activeTab === 'frame' && (
+                <motion.div 
+                  key="tab-frame"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-8"
+                >
+                  {/* Frame Style */}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Frame Style</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      {FRAME_STYLES.map(style => (
+                        <button
+                          key={style.id}
+                          onClick={() => setFrameStyle(style)}
+                          className={cn(
+                            "flex flex-col items-center p-3 border rounded-lg transition-all",
+                            frameStyle.id === style.id ? "border-charcoal bg-gray-50 ring-1 ring-charcoal/20" : "border-gray-200 hover:border-gray-300"
+                          )}
+                        >
+                          <div 
+                            className="w-full aspect-video rounded mb-2 shadow-inner border border-gray-100" 
+                            style={{ backgroundColor: style.color }}
+                          />
+                          <span className="text-[11px] font-medium text-gray-700 text-center leading-tight">{style.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Frame Thickness */}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Thickness</h3>
+                    <div className="flex flex-col gap-2">
+                      {FRAME_THICKNESS.map(thick => (
+                        <button
+                          key={thick.id}
+                          onClick={() => setFrameThickness(thick)}
+                          className={cn(
+                            "flex items-center justify-between p-3 border transition-all rounded",
+                            frameThickness.id === thick.id ? "border-charcoal bg-charcoal text-white" : "border-gray-200 hover:border-gray-300 text-charcoal bg-white"
+                          )}
+                        >
+                          <span className="text-sm font-medium text-inherit">{thick.name}</span>
+                          <div className={cn("bg-current opacity-20")} style={{ height: thick.value, width: '20px' }} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* MAT TAB */}
+              {activeTab === 'mat' && (
+                <motion.div 
+                  key="tab-mat"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-8"
+                >
+                  {/* Mat Size */}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Mat Size</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {MAT_SIZES.map(size => (
+                        <button
+                          key={size.id}
+                          onClick={() => setMatSize(size)}
+                          className={cn(
+                            "p-4 border text-center transition-all rounded",
+                            matSize.id === size.id ? "border-charcoal bg-charcoal text-white" : "border-gray-200 hover:border-gray-300 bg-white"
+                          )}
+                        >
+                          <span className="text-sm font-medium block">{size.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Mat Color */}
+                  {matSize.id !== 'none' && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Mat Color</h3>
+                      <div className="grid grid-cols-3 gap-3">
+                        {MAT_COLORS.map(color => (
+                          <button
+                            key={color.id}
+                            onClick={() => setMatColor(color)}
+                            className={cn(
+                              "flex flex-col items-center p-3 border rounded-lg transition-all",
+                              matColor.id === color.id ? "border-charcoal bg-gray-50 ring-1 ring-charcoal/20" : "border-gray-200 hover:border-gray-300"
+                            )}
+                          >
+                            <div 
+                              className="w-full aspect-square rounded-full mb-2 shadow-sm border border-gray-200" 
+                              style={{ backgroundColor: color.color }}
+                            />
+                            <span className="text-xs font-medium text-gray-700">{color.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* WALL TAB */}
+              {activeTab === 'wall' && (
+                <motion.div 
+                  key="tab-wall"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-8"
+                >
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Preview Background</h3>
+                    <p className="text-sm text-gray-500 mb-4 font-light">Change the background color to visualize how the frame will look on your wall.</p>
+                    <div className="space-y-3">
+                      {WALL_COLORS.map(color => (
+                        <button
+                          key={color.id}
+                          onClick={() => setWallColor(color)}
+                          className={cn(
+                            "w-full flex items-center gap-4 p-3 border transition-all rounded",
+                            wallColor.id === color.id ? "border-charcoal bg-gray-50" : "border-gray-200 hover:border-gray-300"
+                          )}
+                        >
+                          <div 
+                            className="w-10 h-10 rounded-full shadow-inner border border-gray-200" 
+                            style={{ backgroundColor: color.color }}
+                          />
+                          <span className={cn("text-sm font-medium", wallColor.id === color.id ? "text-charcoal" : "text-gray-600")}>
+                            {color.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+            </AnimatePresence>
+          </div>
+
+          {/* Details Summary Footer */}
+          <div className="p-6 bg-gray-50 border-t border-gray-200 mt-auto">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Your Selection</h4>
+            <ul className="space-y-2 mb-6">
+              <li className="flex justify-between text-sm">
+                <span className="text-gray-600">Frame:</span>
+                <span className="font-medium text-charcoal">{frameStyle.name} ({frameThickness.id})</span>
+              </li>
+              <li className="flex justify-between text-sm">
+                <span className="text-gray-600">Matting:</span>
+                <span className="font-medium text-charcoal">{matSize.id === 'none' ? 'None' : `${matSize.name} - ${matColor.name}`}</span>
+              </li>
+            </ul>
+            
+            <a 
+              href={`https://wa.me/91XXXXXXXXXX?text=Hi, I would like a quote for a custom frame: ${frameStyle.name} frame, ${matSize.id === 'none' ? 'No Mat' : matSize.name + ' ' + matColor.name + ' Mat'}.`} 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full block text-center bg-gold text-white px-6 py-3.5 rounded font-medium tracking-wide hover:bg-gold-light transition-colors shadow-md"
+            >
+              Request WhatsApp Quote
+            </a>
+          </div>
+
+        </div>
+      </div>
     </main>
   );
 }
+
