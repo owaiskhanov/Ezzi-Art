@@ -30,9 +30,9 @@ function Layout() {
   const isCustomizePage = location.pathname === '/customize';
 
   return (
-    <div className={isCustomizePage ? "h-[100dvh] flex flex-col font-sans text-charcoal bg-white overflow-hidden" : "min-h-screen flex flex-col font-sans text-charcoal bg-white"}>
+    <div className={isCustomizePage ? "flex flex-col font-sans text-charcoal bg-white overflow-hidden fixed inset-0 w-full h-[100dvh]" : "min-h-screen flex flex-col font-sans text-charcoal bg-white"}>
       {!isCustomizePage && <Navbar />}
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 relative">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />

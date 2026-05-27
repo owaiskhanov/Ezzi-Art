@@ -1,8 +1,21 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "motion/react";
-import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2 } from "lucide-react";
+import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
+
+const Hotspot = ({ top, left, title, description }: { top: string, left: string, title: string, description: string }) => (
+  <div className="absolute z-50 group" style={{ top, left, transform: 'translate(-50%, -50%) translateZ(25px)' }}>
+    <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-charcoal/80 text-white flex items-center justify-center shadow-lg border border-white/20 backdrop-blur-md cursor-help animate-pulse">
+      <Info className="w-3 h-3 md:w-3.5 md:h-3.5" />
+    </div>
+    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-charcoal text-white text-xs p-3 rounded shadow-xl w-48 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity">
+      <h4 className="font-semibold mb-1">{title}</h4>
+      <p className="text-white/80 font-light">{description}</p>
+      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-charcoal"></div>
+    </div>
+  </div>
+);
 
 const FRAME_STYLES = [
   // Wood
@@ -82,6 +95,9 @@ export function Customize() {
 
   // Smart Resize State
   const [naturalAspectRatio, setNaturalAspectRatio] = useState<number | null>(null);
+
+  // Mobile Cart State
+  const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
 
   // 3D Rotation State
   const mouseX = useMotionValue(0);
@@ -263,7 +279,7 @@ export function Customize() {
           ref={previewContainerRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          className="h-[45vh] lg:h-auto lg:flex-1 relative flex items-center justify-center p-4 lg:p-12 overflow-hidden shrink-0"
+          className="h-[40vh] md:h-[45vh] lg:h-auto lg:flex-1 relative flex items-center justify-center p-4 lg:p-12 overflow-hidden shrink-0"
           style={{ 
             backgroundColor: isARMode ? 'transparent' : wallColor.color,
             transition: 'background-color 0.5s ease',
@@ -304,11 +320,23 @@ export function Customize() {
                   padding: frameThickness.value,
                   // Add subtle inner and outer shadows to the frame
                   boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), inset 0 3px 15px rgba(0,0,0,0.6)',
-                  maxWidth: '90%',
-                  maxHeight: '90%',
                   transformStyle: 'preserve-3d'
                 }}
               >
+                <Hotspot 
+                  top="-10px" 
+                  left="50%" 
+                  title={`${frameStyle.name} Frame`} 
+                  description={frameStyle.material === 'wood' ? 'Premium hand-finished wood. Durable and timeless.' : 'Sleek, modern steel profile. Minimalist and sturdy.'}
+                />
+                
+                <Hotspot 
+                  top="50%" 
+                  left="50%" 
+                  title={`${glassType.name}`} 
+                  description={glassType.description}
+                />
+
                 {/* Wood Grain Texture Overlay for Frame */}
                 {frameStyle.material === 'wood' && !frameStyle.texture && (
                    <div className="absolute inset-0 opacity-20 pointer-events-none" 
@@ -346,11 +374,11 @@ export function Customize() {
                     <img 
                       src={image} 
                       alt="Your Art" 
-                      className="block object-cover"
+                      className="block object-cover h-[20vh] md:h-[25vh] lg:h-[45vh] xl:h-[50vh]"
                       style={{
                         aspectRatio: `${artWidth} / ${artHeight}`,
-                        maxHeight: '55vh',
-                        maxWidth: 'min(80vw, 500px)'
+                        width: 'auto',
+                        maxWidth: 'calc(100vw - 120px)'
                       }}
                     />
                   </div>
@@ -476,7 +504,7 @@ export function Customize() {
           </div>
 
           {/* Tab Content */}
-          <div className="p-6 flex-1 overflow-y-auto min-h-0 bg-gray-50/30">
+          <div className="p-4 md:p-6 pb-24 lg:pb-6 flex-1 overflow-y-auto min-h-0 bg-gray-50/30">
             <AnimatePresence mode="wait">
               
               {/* SIZE TAB */}
@@ -762,8 +790,18 @@ export function Customize() {
             </AnimatePresence>
           </div>
 
-          {/* Details Summary Footer */}
-          <div className="p-4 lg:p-5 bg-white border-t border-gray-200 mt-auto shadow-[0_-10px_20px_rgba(0,0,0,0.02)] relative z-30 shrink-0">
+          {/* Floating Mobile Cart Button */}
+          <div className="lg:hidden fixed bottom-6 right-6 z-40">
+            <button 
+              onClick={() => setIsMobileCartOpen(true)}
+              className="bg-charcoal text-white p-4 rounded-full shadow-2xl flex items-center justify-center hover:bg-black transition-colors"
+            >
+              <ShoppingBag className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Details Summary Footer (Desktop) */}
+          <div className="hidden lg:block p-4 lg:p-5 bg-white border-t border-gray-200 mt-auto shadow-[0_-10px_20px_rgba(0,0,0,0.02)] relative z-30 shrink-0">
             <div className="flex items-end justify-between mb-4">
               <div>
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Estimated Total</h4>
@@ -794,6 +832,60 @@ export function Customize() {
             </p>
           </div>
 
+          {/* Mobile Cart Bottom Sheet */}
+          <AnimatePresence>
+            {isMobileCartOpen && (
+              <>
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setIsMobileCartOpen(false)}
+                  className="fixed inset-0 bg-charcoal/40 backdrop-blur-sm z-50 lg:hidden"
+                />
+                <motion.div
+                  initial={{ y: '100%' }}
+                  animate={{ y: 0 }}
+                  exit={{ y: '100%' }}
+                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                  className="fixed bottom-0 left-0 right-0 bg-white z-50 rounded-t-3xl shadow-[0_-20px_40px_rgba(0,0,0,0.1)] p-6 lg:hidden"
+                >
+                  <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6" />
+                  
+                  <div className="flex items-end justify-between mb-6">
+                    <div>
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Estimated Total</h4>
+                      <div className="text-4xl font-serif text-charcoal font-medium">${estimatedPrice}</div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-base font-medium text-charcoal">{artWidth} × {artHeight} in</p>
+                      <p className="text-sm text-gray-500 mt-0.5">{frameStyle.name}</p>
+                      <p className="text-sm text-gray-500">{glassType.name}</p>
+                    </div>
+                  </div>
+
+                  <a 
+                    href={`https://wa.me/919819708112?text=${whatsappMessage}`} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      setIsMobileCartOpen(false);
+                      if (image) {
+                        alert("Please remember to attach your uploaded image to the WhatsApp chat so we can print and frame it!");
+                      }
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-charcoal text-white px-6 py-4 rounded-xl font-medium tracking-wide hover:bg-charcoal/90 transition-all shadow-md group text-lg"
+                  >
+                    <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    Place Custom Order
+                  </a>
+                  <p className="text-center text-xs text-gray-400 mt-4 tracking-wide">
+                    Secure checkout via WhatsApp link. Free shipping over $150.
+                  </p>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </main>
