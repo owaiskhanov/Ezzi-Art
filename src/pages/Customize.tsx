@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "motion/react";
-import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info } from "lucide-react";
+import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info, Columns } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
 
@@ -16,6 +16,13 @@ const Hotspot = ({ top, left, title, description }: { top: string, left: string,
     </div>
   </div>
 );
+
+const FRAMING_TYPES = [
+  { id: 'standard', name: 'Standard Frame', desc: 'Classic framed print with glass' },
+  { id: 'floater', name: 'Canvas Floater', desc: 'Canvas with a 1/4" float gap' },
+  { id: 'wrap', name: 'Gallery Wrap', desc: 'Frameless stretched canvas' },
+  { id: 'shadowbox', name: 'Shadowbox', desc: 'Deep set art for 3D effect' },
+];
 
 const FRAME_STYLES = [
   // Wood
@@ -91,6 +98,7 @@ export function Customize() {
   const [artWidth, setArtWidth] = useState<number>(8);
   const [artHeight, setArtHeight] = useState<number>(10);
   const [printMedium, setPrintMedium] = useState(PRINT_MEDIA[1]);
+  const [framingType, setFramingType] = useState(FRAMING_TYPES[0]);
   
   const [frameStyle, setFrameStyle] = useState(FRAME_STYLES[0]);
   const [frameThickness, setFrameThickness] = useState(FRAME_THICKNESS[1]);
@@ -103,6 +111,8 @@ export function Customize() {
   const [wallColor, setWallColor] = useState(WALL_COLORS[1]);
   const [customWallImage, setCustomWallImage] = useState<string | null>(null);
   const [lighting, setLighting] = useState<number>(100);
+
+  const [compareConfig, setCompareConfig] = useState<any>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const wallInputRef = useRef<HTMLInputElement>(null);
@@ -178,6 +188,7 @@ export function Customize() {
         if (parsed.artWidth) setArtWidth(parsed.artWidth);
         if (parsed.artHeight) setArtHeight(parsed.artHeight);
         if (parsed.printMedium) setPrintMedium(parsed.printMedium);
+        if (parsed.framingType) setFramingType(parsed.framingType);
         if (parsed.frameStyle) setFrameStyle(parsed.frameStyle);
         if (parsed.frameThickness) setFrameThickness(parsed.frameThickness);
         if (parsed.matStyle) setMatStyle(parsed.matStyle);
@@ -202,6 +213,7 @@ export function Customize() {
       artWidth,
       artHeight,
       printMedium,
+      framingType,
       frameStyle,
       frameThickness,
       matStyle,
@@ -226,7 +238,7 @@ export function Customize() {
         console.error("Failed to save state to localStorage", err);
       }
     }
-  }, [image, artWidth, artHeight, printMedium, frameStyle, frameThickness, matStyle, matProfile, matColor, innerMatColor, matSize, glassType, wallColor, customWallImage, lighting]);
+  }, [image, artWidth, artHeight, printMedium, framingType, frameStyle, frameThickness, matStyle, matProfile, matColor, innerMatColor, matSize, glassType, wallColor, customWallImage, lighting]);
 
   // Price Calculation
   const estimatedPrice = useMemo(() => {
@@ -321,6 +333,123 @@ export function Customize() {
     return Math.min(1.05, Math.max(0.65, 0.65 + (area / 3000)));
   }, [artWidth, artHeight]);
 
+  const stateAsConfig = { image, artWidth, artHeight, printMedium, framingType, frameStyle, frameThickness, matStyle, matProfile, matColor, innerMatColor, matSize, glassType };
+  const configsToRender = compareConfig ? [
+    { ...stateAsConfig, id: "current", label: "Current Configuration" },
+    { ...compareConfig, id: "compare", label: "Comparison" }
+  ] : [ { ...stateAsConfig, id: "current" } ];
+
+  const renderFrameElement = (config: any) => {
+    const isWrap = config.framingType.id === 'wrap';
+    const isFloater = config.framingType.id === 'floater';
+    const isShadowbox = config.framingType.id === 'shadowbox';
+    
+    return (
+      <div 
+        key={config.id}
+        className="relative shadow-2xl inline-flex items-center justify-center shrink-0 z-10 flex-col gap-4"
+        style={{ 
+          backgroundColor: isWrap ? 'transparent' : config.frameStyle.color,
+          backgroundImage: (!isWrap && config.frameStyle.texture) ? `url(${config.frameStyle.texture})` : undefined,
+          backgroundSize: 'cover',
+          padding: isWrap ? '0px' : config.frameThickness.value,
+          boxShadow: isWrap ? '0 25px 50px -12px rgba(0, 0, 0, 0.4)' : (isShadowbox ? '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 30px 40px rgba(0,0,0,0.8)' : '0 25px 50px -12px rgba(0, 0, 0, 0.4), inset 0 3px 15px rgba(0,0,0,0.6)'),
+          transformStyle: 'preserve-3d'
+        }}
+      >
+        {compareConfig && (
+          <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase text-charcoal shadow-sm border border-black/5 whitespace-nowrap z-50">
+            {config.label}
+          </div>
+        )}
+        
+        {!isWrap && (
+          <>
+            <Hotspot 
+              top="-10px" 
+              left="50%" 
+              title={`${config.frameStyle.name} Frame`} 
+              description={config.frameStyle.material === 'wood' ? 'Premium hand-finished wood.' : 'Sleek, modern steel profile.'}
+            />
+            <Hotspot 
+              top="50%" 
+              left="50%" 
+              title={`${config.glassType.name}`} 
+              description={config.glassType.description}
+            />
+            {config.frameStyle.material === 'wood' && !config.frameStyle.texture && (
+               <div className="absolute inset-0 opacity-20 pointer-events-none" 
+                    style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', transform: 'translateZ(1px)' }} />
+            )}
+          </>
+        )}
+
+        <div 
+          className="relative shrink-0 inline-flex"
+          style={{
+            backgroundColor: isWrap ? 'transparent' : (isFloater ? '#1a1a1a' : config.matColor.color),
+            padding: isWrap ? '0px' : (isFloater ? '12px' : config.matSize.value),
+            paddingBottom: (!isWrap && !isFloater && config.matSize.id !== 'none' && config.matProfile === 'bottom-weighted') ? `calc(${config.matSize.value} + 30px)` : undefined,
+            boxShadow: isWrap ? 'none' : (isFloater ? 'inset 0 4px 15px rgba(0,0,0,0.8)' : (isShadowbox ? 'inset 0px 10px 30px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.5)' : 'inset 0px 4px 15px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.5)')),
+            transform: isWrap ? 'translateZ(10px)' : (isShadowbox ? 'translateZ(20px)' : 'translateZ(10px)'),
+            transformStyle: 'preserve-3d'
+          }}
+        >
+          {(!isWrap && !isFloater) && (
+            <>
+              <div className="absolute inset-0 opacity-[0.04] pointer-events-none" 
+                   style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/paper.png")' }} />
+              {config.matStyle === 'double' && config.matSize.id !== 'none' && (
+                 <div className="absolute inset-0 z-10 pointer-events-none" 
+                      style={{ 
+                         border: `12px solid ${config.innerMatColor.color}`,
+                         margin: Math.max(0, parseInt(config.matSize.value) - 12) + 'px',
+                         marginBottom: config.matProfile === 'bottom-weighted' ? Math.max(0, parseInt(config.matSize.value) - 12 + 30) + 'px' : Math.max(0, parseInt(config.matSize.value) - 12) + 'px',
+                         boxShadow: 'inset 0px 4px 15px rgba(0,0,0,0.2)',
+                         transform: 'translateZ(1px)'
+                      }}>
+                     <div className="absolute inset-0 opacity-[0.04] mix-blend-multiply" 
+                          style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/paper.png")' }} />
+                 </div>
+              )}
+            </>
+          )}
+
+          {(!isWrap && config.glassType.id !== 'museum' && config.glassType.id !== 'non-glare') && (
+             <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 pointer-events-none z-10" 
+                  style={{ transform: 'translateZ(15px)' }}/>
+          )}
+
+          <div 
+            className="relative bg-white overflow-hidden shrink-0"
+            style={{
+              boxShadow: isWrap ? 'inset 0 0 20px rgba(0,0,0,0.4), 0 10px 20px rgba(0,0,0,0.2)' : 'inset 0 0 10px rgba(0,0,0,0.1), 0 4px 15px rgba(0,0,0,0.3)',
+              transform: isWrap ? 'translateZ(5px)' : (isFloater ? 'translateZ(10px)' : 'translateZ(5px)')
+            }}
+          >
+            {isWrap && (
+               <div className="absolute inset-0 opacity-30 bg-gradient-to-l from-black/60 via-transparent to-white/20 pointer-events-none mix-blend-multiply border border-black/10 z-20" />
+            )}
+            {config.printMedium.id === 'canvas' && (
+               <div className="absolute inset-0 opacity-[0.2] mix-blend-multiply pointer-events-none z-10" 
+                    style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/woven-light.png")' }} />
+            )}
+            <img 
+              src={config.image} 
+              alt="Your Art" 
+              className={cn("block object-cover", compareConfig ? "h-[15vh] md:h-[20vh] lg:h-[35vh] xl:h-[40vh]" : "h-[20vh] md:h-[25vh] lg:h-[45vh] xl:h-[50vh]")}
+              style={{
+                aspectRatio: `${config.artWidth} / ${config.artHeight}`,
+                width: 'auto',
+                maxWidth: compareConfig ? 'calc(50vw - 80px)' : 'calc(100vw - 120px)'
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <main className="flex-1 flex flex-col min-h-0 bg-gray-50 overflow-hidden">
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
@@ -369,99 +498,19 @@ export function Customize() {
           <AnimatePresence mode="wait">
             {image ? (
               <motion.div 
-                key="frame-preview"
+                key="frames-container"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: frameScale }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.4 }}
-                className="relative shadow-2xl inline-flex items-center justify-center shrink-0 z-10"
+                className={cn("relative inline-flex items-center justify-center shrink-0 w-full", compareConfig ? "flex-col md:flex-row gap-8 md:gap-16 lg:gap-24" : "")}
                 style={{ 
                   rotateX,
                   rotateY,
-                  backgroundColor: frameStyle.color,
-                  backgroundImage: frameStyle.texture ? `url(${frameStyle.texture})` : undefined,
-                  backgroundSize: 'cover',
-                  padding: frameThickness.value,
-                  // Add subtle inner and outer shadows to the frame
-                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), inset 0 3px 15px rgba(0,0,0,0.6)',
                   transformStyle: 'preserve-3d'
                 }}
               >
-                <Hotspot 
-                  top="-10px" 
-                  left="50%" 
-                  title={`${frameStyle.name} Frame`} 
-                  description={frameStyle.material === 'wood' ? 'Premium hand-finished wood. Durable and timeless.' : 'Sleek, modern steel profile. Minimalist and sturdy.'}
-                />
-                
-                <Hotspot 
-                  top="50%" 
-                  left="50%" 
-                  title={`${glassType.name}`} 
-                  description={glassType.description}
-                />
-
-                {/* Wood Grain Texture Overlay for Frame */}
-                {frameStyle.material === 'wood' && !frameStyle.texture && (
-                   <div className="absolute inset-0 opacity-20 pointer-events-none" 
-                        style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', transform: 'translateZ(1px)' }} />
-                )}
-
-                <div 
-                  className="relative shrink-0 inline-flex"
-                  style={{
-                    backgroundColor: matColor.color,
-                    padding: matSize.value,
-                    paddingBottom: matSize.id !== 'none' && matProfile === 'bottom-weighted' ? `calc(${matSize.value} + 30px)` : matSize.value,
-                    // Inner shadow on mat simulating depth
-                    boxShadow: 'inset 0px 4px 15px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.5)',
-                    transform: 'translateZ(10px)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                >
-                  {/* Subtle Mat Texture */}
-                  <div className="absolute inset-0 opacity-[0.04] pointer-events-none" 
-                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/paper.png")' }} />
-
-                  {matStyle === 'double' && matSize.id !== 'none' && (
-                     <div className="absolute inset-0 z-10 pointer-events-none" 
-                          style={{ 
-                             border: `12px solid ${innerMatColor.color}`,
-                             margin: Math.max(0, parseInt(matSize.value) - 12) + 'px',
-                             marginBottom: matProfile === 'bottom-weighted' ? Math.max(0, parseInt(matSize.value) - 12 + 30) + 'px' : Math.max(0, parseInt(matSize.value) - 12) + 'px',
-                             boxShadow: 'inset 0px 4px 15px rgba(0,0,0,0.2)',
-                             transform: 'translateZ(1px)' // Pop inner mat out slightly
-                          }}>
-                         <div className="absolute inset-0 opacity-[0.04] mix-blend-multiply" 
-                              style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/paper.png")' }} />
-                     </div>
-                  )}
-
-                  {/* Glass Reflection effect if Museum/Standard isn't selected */}
-                  {glassType.id !== 'museum' && glassType.id !== 'non-glare' && (
-                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 pointer-events-none z-10" 
-                          style={{ transform: 'translateZ(15px)' }}/>
-                  )}
-
-                  <div 
-                    className="relative bg-white overflow-hidden shrink-0"
-                    style={{
-                      boxShadow: 'inset 0 0 10px rgba(0,0,0,0.1), 0 4px 15px rgba(0,0,0,0.3)',
-                      transform: 'translateZ(5px)'
-                    }}
-                  >
-                    <img 
-                      src={image} 
-                      alt="Your Art" 
-                      className="block object-cover h-[20vh] md:h-[25vh] lg:h-[45vh] xl:h-[50vh]"
-                      style={{
-                        aspectRatio: `${artWidth} / ${artHeight}`,
-                        width: 'auto',
-                        maxWidth: 'calc(100vw - 120px)'
-                      }}
-                    />
-                  </div>
-                </div>
+                {configsToRender.map((c) => renderFrameElement(c))}
               </motion.div>
             ) : (
               <motion.div 
@@ -505,6 +554,21 @@ export function Customize() {
                       title="Reset all choices"
                     >
                       <RotateCcw className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        triggerHaptic();
+                        if (compareConfig) {
+                          setCompareConfig(null);
+                        } else {
+                          setCompareConfig(stateAsConfig);
+                        }
+                      }}
+                      className={cn("p-1.5 rounded-full transition-colors flex items-center gap-1.5 text-xs font-medium ml-2", compareConfig ? "bg-charcoal text-white" : "bg-purple-50 text-purple-600 hover:bg-purple-100")}
+                      title="Compare Configurations"
+                    >
+                      <Columns className="w-3.5 h-3.5" />
+                      {compareConfig ? 'Comparing' : 'Compare'}
                     </button>
                     <button
                       onClick={toggleARMode}
@@ -553,24 +617,28 @@ export function Customize() {
             >
               <Frame className="w-4 h-4" /> Frame
             </button>
-            <button 
-              onClick={() => setActiveTab('mat')}
-              className={cn(
-                "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
-                activeTab === 'mat' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
-              )}
-            >
-              <Ruler className="w-4 h-4" /> Matting
-            </button>
-            <button 
-              onClick={() => setActiveTab('glass')}
-              className={cn(
-                "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
-                activeTab === 'glass' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
-              )}
-            >
-              <Droplets className="w-4 h-4" /> Glass
-            </button>
+            {framingType.id !== 'wrap' && framingType.id !== 'floater' && (
+              <button 
+                onClick={() => setActiveTab('mat')}
+                className={cn(
+                  "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
+                  activeTab === 'mat' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
+                )}
+              >
+                <Ruler className="w-4 h-4" /> Matting
+              </button>
+            )}
+            {framingType.id !== 'wrap' && (
+              <button 
+                onClick={() => setActiveTab('glass')}
+                className={cn(
+                  "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
+                  activeTab === 'glass' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
+                )}
+              >
+                <Droplets className="w-4 h-4" /> Glass
+              </button>
+            )}
             <button 
               onClick={() => setActiveTab('wall')}
               className={cn(
@@ -701,7 +769,40 @@ export function Customize() {
                   transition={{ duration: 0.2 }}
                   className="space-y-8"
                 >
+                  {/* Framing Type */}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Mounting Style</h3>
+                    <div className="grid grid-cols-2 gap-3 mb-8">
+                      {FRAMING_TYPES.map(type => (
+                        <motion.button
+                          whileTap={{ scale: 0.98 }}
+                          key={type.id}
+                          onClick={() => {
+                            triggerHaptic();
+                            setFramingType(type);
+                            if (type.id === 'wrap' || type.id === 'floater') {
+                              setPrintMedium(PRINT_MEDIA[3]); // Canvas
+                              setMatSize(MAT_SIZES[0]); // No mat
+                              if (type.id === 'wrap') {
+                                setGlassType(GLASS_TYPES[0]); // Actually no glass, just visual fallback
+                              }
+                            }
+                          }}
+                          className={cn(
+                            "flex flex-col text-left p-3 border transition-all rounded",
+                            framingType.id === type.id ? "border-charcoal bg-charcoal text-white" : "border-gray-200 hover:border-gray-300 bg-white"
+                          )}
+                        >
+                          <span className="text-sm font-medium">{type.name}</span>
+                          <span className={cn("text-xs mt-1", framingType.id === type.id ? "text-white/80" : "text-gray-500")}>{type.desc}</span>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Frame Style */}
+                  {framingType.id !== 'wrap' && (
+                  <>
                   <div>
                     <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Frame Material & Style</h3>
                     
@@ -772,6 +873,8 @@ export function Customize() {
                       ))}
                     </div>
                   </div>
+                  </>
+                  )}
                 </motion.div>
               )}
 
