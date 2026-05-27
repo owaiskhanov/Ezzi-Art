@@ -1,6 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag } from "lucide-react";
+import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
 
@@ -32,6 +32,13 @@ const MAT_SIZES = [
   { id: 'large', name: '5" Large', value: '80px' },
 ];
 
+const GLASS_TYPES = [
+  { id: 'standard', name: 'Standard Clear', description: 'Basic protection, slight glare.', multiplier: 1 },
+  { id: 'non-glare', name: 'Non-Glare', description: 'Reduces reflections, slight matte finish.', multiplier: 1.2 },
+  { id: 'uv', name: 'UV Conservation', description: '99% UV blocking to prevent fading.', multiplier: 1.5 },
+  { id: 'museum', name: 'Museum Glass', description: 'Anti-reflective & 99% UV protection.', multiplier: 2.5 },
+];
+
 const WALL_COLORS = [
   { id: 'white', name: 'White', color: '#ffffff' },
   { id: 'gray', name: 'Gallery Gray', color: '#e5e7eb' },
@@ -40,17 +47,42 @@ const WALL_COLORS = [
 ];
 
 export function Customize() {
-  const [activeTab, setActiveTab] = useState<'frame' | 'mat' | 'wall'>('frame');
+  const [activeTab, setActiveTab] = useState<'size' | 'frame' | 'mat' | 'glass' | 'wall'>('size');
   
   // Customization State
   const [image, setImage] = useState<string | null>(null);
+  const [artWidth, setArtWidth] = useState<number>(8);
+  const [artHeight, setArtHeight] = useState<number>(10);
+  
   const [frameStyle, setFrameStyle] = useState(FRAME_STYLES[0]);
   const [frameThickness, setFrameThickness] = useState(FRAME_THICKNESS[1]);
   const [matColor, setMatColor] = useState(MAT_COLORS[0]);
   const [matSize, setMatSize] = useState(MAT_SIZES[2]);
+  const [glassType, setGlassType] = useState(GLASS_TYPES[0]);
   const [wallColor, setWallColor] = useState(WALL_COLORS[1]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Price Calculation
+  const estimatedPrice = useMemo(() => {
+    const area = artWidth * artHeight;
+    const basePrice = 30; // Base handling fee
+    
+    let frameRate = 0.5; // per sq inch
+    if (frameThickness.id === 'standard') frameRate = 0.8;
+    if (frameThickness.id === 'thick') frameRate = 1.2;
+    if (frameStyle.id === 'gold' || frameStyle.id === 'silver') frameRate *= 1.3;
+
+    let matRate = 0;
+    if (matSize.id === 'small') matRate = 0.2;
+    if (matSize.id === 'medium') matRate = 0.3;
+    if (matSize.id === 'large') matRate = 0.5;
+
+    const glassRate = 0.4 * glassType.multiplier;
+
+    let total = basePrice + (area * frameRate) + (area * matRate) + (area * glassRate);
+    return Math.max(30, Math.round(total));
+  }, [artWidth, artHeight, frameThickness, frameStyle, matSize, glassType]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -65,16 +97,29 @@ export function Customize() {
 
   const handleReset = () => {
     setImage(null);
+    setArtWidth(8);
+    setArtHeight(10);
     setFrameStyle(FRAME_STYLES[0]);
     setFrameThickness(FRAME_THICKNESS[1]);
     setMatColor(MAT_COLORS[0]);
     setMatSize(MAT_SIZES[2]);
+    setGlassType(GLASS_TYPES[0]);
     setWallColor(WALL_COLORS[1]);
   };
 
+  const whatsappMessage = encodeURIComponent(
+    `Hi, I would like to place an order for a custom frame.\n\n` +
+    `Details:\n` +
+    `- Art Size: ${artWidth}" x ${artHeight}"\n` +
+    `- Frame Style: ${frameStyle.name} (${frameThickness.name})\n` +
+    `- Matting: ${matSize.id === 'none' ? 'None' : `${matSize.name} - ${matColor.name}`}\n` +
+    `- Glass: ${glassType.name}\n` +
+    `\nEstimated Total: $${estimatedPrice}\n\n` +
+    `Please confirm the next steps to proceed with payment and file transfer.`
+  );
+
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col pt-20">
-      
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-4">
@@ -83,7 +128,7 @@ export function Customize() {
           </Link>
           <div>
             <h1 className="text-xl font-serif text-charcoal font-semibold">Frame Studio</h1>
-            <p className="text-xs text-gray-500 font-medium tracking-widest uppercase">Interactive Visualizer</p>
+            <p className="text-xs text-gray-500 font-medium tracking-widest uppercase">Place Your Order</p>
           </div>
         </div>
         
@@ -95,15 +140,6 @@ export function Customize() {
             <RotateCcw className="w-4 h-4" />
             Reset
           </button>
-          <a 
-            href="https://wa.me/91XXXXXXXXXX" 
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-charcoal text-white px-5 py-2.5 rounded-none text-sm font-medium tracking-wide hover:bg-charcoal/90 transition-colors flex items-center gap-2"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            Request Quote
-          </a>
         </div>
       </header>
 
@@ -153,6 +189,11 @@ export function Customize() {
                   <div className="absolute inset-0 opacity-[0.04] pointer-events-none" 
                        style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/paper.png")' }} />
 
+                  {/* Glass Reflection effect if Museum/Standard isn't selected */}
+                  {glassType.id !== 'museum' && glassType.id !== 'non-glare' && (
+                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 pointer-events-none z-10" />
+                  )}
+
                   <div 
                     className="relative bg-white overflow-hidden flex items-center justify-center shrink-0"
                     style={{
@@ -195,20 +236,20 @@ export function Customize() {
         </div>
 
         {/* Controls Area (Right) */}
-        <div className="w-full lg:w-[450px] bg-white border-l border-gray-200 flex flex-col h-[50vh] lg:h-auto overflow-y-auto z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.03)]">
+        <div className="w-full lg:w-[450px] bg-white border-l border-gray-200 flex flex-col h-[50vh] lg:h-auto overflow-y-auto z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.03)] shrink-0">
           
           {/* Active Image Status */}
-          <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+          <div className="p-4 border-b border-gray-100 bg-gray-50/50">
              <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-charcoal">Artwork</h3>
+                  <h3 className="text-sm font-semibold text-charcoal">Artwork Overview</h3>
                   <p className="text-xs text-gray-500 mt-1">{image ? 'Custom image loaded' : 'No image selected'}</p>
                 </div>
                 <button 
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-xs font-medium bg-white border border-gray-200 px-3 py-1.5 rounded text-charcoal hover:bg-gray-50 transition-colors shadow-sm"
+                  className="text-xs font-medium bg-white border border-gray-200 px-3 py-1.5 rounded text-charcoal hover:bg-gray-50 transition-colors shadow-sm focus:outline-none"
                 >
-                  {image ? 'Change' : 'Upload'}
+                  {image ? 'Change Art' : 'Upload Art'}
                 </button>
                 <input 
                   type="file" 
@@ -220,12 +261,21 @@ export function Customize() {
              </div>
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex border-b border-gray-200 sticky top-0 bg-white z-10">
+          {/* Navigation Tabs (Scrollable) */}
+          <div className="flex overflow-x-auto border-b border-gray-200 sticky top-0 bg-white z-10 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <button 
+              onClick={() => setActiveTab('size')}
+              className={cn(
+                "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
+                activeTab === 'size' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
+              )}
+            >
+              <BoxSelect className="w-4 h-4" /> Size
+            </button>
             <button 
               onClick={() => setActiveTab('frame')}
               className={cn(
-                "flex-1 py-4 text-sm font-medium transition-colors border-b-2 flex items-center justify-center gap-2",
+                "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
                 activeTab === 'frame' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
               )}
             >
@@ -234,16 +284,25 @@ export function Customize() {
             <button 
               onClick={() => setActiveTab('mat')}
               className={cn(
-                "flex-1 py-4 text-sm font-medium transition-colors border-b-2 flex items-center justify-center gap-2",
+                "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
                 activeTab === 'mat' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
               )}
             >
               <Ruler className="w-4 h-4" /> Matting
             </button>
             <button 
+              onClick={() => setActiveTab('glass')}
+              className={cn(
+                "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
+                activeTab === 'glass' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
+              )}
+            >
+              <Droplets className="w-4 h-4" /> Glass
+            </button>
+            <button 
               onClick={() => setActiveTab('wall')}
               className={cn(
-                "flex-1 py-4 text-sm font-medium transition-colors border-b-2 flex items-center justify-center gap-2",
+                "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
                 activeTab === 'wall' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
               )}
             >
@@ -255,6 +314,47 @@ export function Customize() {
           <div className="p-6 flex-1 overflow-y-auto">
             <AnimatePresence mode="wait">
               
+              {/* SIZE TAB */}
+              {activeTab === 'size' && (
+                <motion.div 
+                  key="tab-size"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-8"
+                >
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Artwork Dimensions</h3>
+                    <p className="text-sm text-gray-500 mb-6 font-light">Enter the exact dimensions of your artwork in inches. We will build the frame and cut the mat slightly smaller to hold your art perfectly.</p>
+                    
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Width (in)</label>
+                        <input 
+                          type="number" 
+                          min="4" max="60"
+                          value={artWidth}
+                          onChange={(e) => setArtWidth(Math.max(4, Number(e.target.value)))}
+                          className="w-full border border-gray-200 rounded p-3 text-center focus:outline-none focus:ring-1 focus:ring-charcoal focus:border-charcoal transition-all text-lg font-medium"
+                        />
+                      </div>
+                      <div className="text-gray-300 font-light text-2xl mt-6">×</div>
+                      <div className="flex-1">
+                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Height (in)</label>
+                        <input 
+                          type="number" 
+                          min="4" max="60"
+                          value={artHeight}
+                          onChange={(e) => setArtHeight(Math.max(4, Number(e.target.value)))}
+                          className="w-full border border-gray-200 rounded p-3 text-center focus:outline-none focus:ring-1 focus:ring-charcoal focus:border-charcoal transition-all text-lg font-medium"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* FRAME TAB */}
               {activeTab === 'frame' && (
                 <motion.div 
@@ -366,6 +466,37 @@ export function Customize() {
                 </motion.div>
               )}
 
+              {/* GLASS TAB */}
+              {activeTab === 'glass' && (
+                <motion.div 
+                  key="tab-glass"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-8"
+                >
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Glass Options</h3>
+                    <div className="flex flex-col gap-3">
+                      {GLASS_TYPES.map(g => (
+                        <button
+                          key={g.id}
+                          onClick={() => setGlassType(g)}
+                          className={cn(
+                            "flex flex-col text-left p-4 border transition-all rounded",
+                            glassType.id === g.id ? "border-charcoal bg-charcoal text-white" : "border-gray-200 hover:border-gray-300 bg-white"
+                          )}
+                        >
+                          <span className="text-sm font-semibold">{g.name}</span>
+                          <span className={cn("text-xs mt-1", glassType.id === g.id ? "text-white/80" : "text-gray-500")}>{g.description}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* WALL TAB */}
               {activeTab === 'wall' && (
                 <motion.div 
@@ -407,27 +538,30 @@ export function Customize() {
           </div>
 
           {/* Details Summary Footer */}
-          <div className="p-6 bg-gray-50 border-t border-gray-200 mt-auto">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Your Selection</h4>
-            <ul className="space-y-2 mb-6">
-              <li className="flex justify-between text-sm">
-                <span className="text-gray-600">Frame:</span>
-                <span className="font-medium text-charcoal">{frameStyle.name} ({frameThickness.id})</span>
-              </li>
-              <li className="flex justify-between text-sm">
-                <span className="text-gray-600">Matting:</span>
-                <span className="font-medium text-charcoal">{matSize.id === 'none' ? 'None' : `${matSize.name} - ${matColor.name}`}</span>
-              </li>
-            </ul>
+          <div className="p-5 bg-white border-t border-gray-200 mt-auto shadow-[0_-10px_20px_rgba(0,0,0,0.02)] relative z-30">
+            <div className="flex items-end justify-between mb-4">
+              <div>
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Estimated Total</h4>
+                <div className="text-3xl font-serif text-charcoal font-medium">${estimatedPrice}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-xs text-gray-500">{artWidth} × {artHeight} in</div>
+                <div className="text-xs text-gray-500">{frameStyle.name} • {glassType.name}</div>
+              </div>
+            </div>
             
             <a 
-              href={`https://wa.me/91XXXXXXXXXX?text=Hi, I would like a quote for a custom frame: ${frameStyle.name} frame, ${matSize.id === 'none' ? 'No Mat' : matSize.name + ' ' + matColor.name + ' Mat'}.`} 
+              href={`https://wa.me/91XXXXXXXXXX?text=${whatsappMessage}`} 
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full block text-center bg-gold text-white px-6 py-3.5 rounded font-medium tracking-wide hover:bg-gold-light transition-colors shadow-md"
+              className="w-full flex items-center justify-center gap-2 bg-charcoal text-white px-6 py-3.5 rounded-none font-medium tracking-wide hover:bg-charcoal/90 transition-all shadow-md group"
             >
-              Request WhatsApp Quote
+              <ShoppingBag className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              Place Custom Order
             </a>
+            <p className="text-[10px] text-gray-400 text-center mt-3 tracking-wide">
+              Secure checkout via WhatsApp link. Free shipping over $150.
+            </p>
           </div>
 
         </div>
@@ -435,4 +569,3 @@ export function Customize() {
     </main>
   );
 }
-
