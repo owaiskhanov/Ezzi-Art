@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "motion/react";
-import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info, Columns } from "lucide-react";
+import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info, Columns, ZoomIn, ZoomOut, Maximize } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
 
@@ -134,6 +134,31 @@ export function Customize() {
   const mouseY = useMotionValue(0);
   const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [15, -15]), { stiffness: 150, damping: 20 });
   const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-15, 15]), { stiffness: 150, damping: 20 });
+
+  // Zoom State
+  const [userZoom, setUserZoom] = useState(1);
+  const MAX_ZOOM = 3;
+  const MIN_ZOOM = 0.5;
+
+  const handleZoomIn = () => setUserZoom(z => Math.min(MAX_ZOOM, z + 0.25));
+  const handleZoomOut = () => setUserZoom(z => Math.max(MIN_ZOOM, z - 0.25));
+  const handleZoomReset = () => setUserZoom(1);
+
+  // Wheel zoom
+  useEffect(() => {
+    const container = previewContainerRef.current;
+    if (!container) return;
+    
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        setUserZoom(z => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z - e.deltaY * 0.01)));
+      }
+    };
+    
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!previewContainerRef.current) return;
@@ -347,7 +372,7 @@ export function Customize() {
     return (
       <div 
         key={config.id}
-        className="relative shadow-2xl inline-flex items-center justify-center shrink-0 z-10 flex-col gap-4"
+        className="relative shadow-2xl inline-flex items-center justify-center shrink-0 z-10"
         style={{ 
           backgroundColor: isWrap ? 'transparent' : config.frameStyle.color,
           backgroundImage: (!isWrap && config.frameStyle.texture) ? `url(${config.frameStyle.texture})` : undefined,
@@ -389,7 +414,7 @@ export function Customize() {
           style={{
             backgroundColor: isWrap ? 'transparent' : (isFloater ? '#1a1a1a' : config.matColor.color),
             padding: isWrap ? '0px' : (isFloater ? '12px' : config.matSize.value),
-            paddingBottom: (!isWrap && !isFloater && config.matSize.id !== 'none' && config.matProfile === 'bottom-weighted') ? `calc(${config.matSize.value} + 30px)` : undefined,
+            paddingBottom: (!isWrap && !isFloater && config.matSize.id !== 'none' && config.matProfile === 'bottom-weighted') ? `calc(${config.matSize.value} + 30px)` : (isWrap ? '0px' : (isFloater ? '12px' : config.matSize.value)),
             boxShadow: isWrap ? 'none' : (isFloater ? 'inset 0 4px 15px rgba(0,0,0,0.8)' : (isShadowbox ? 'inset 0px 10px 30px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.5)' : 'inset 0px 4px 15px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.5)')),
             transform: isWrap ? 'translateZ(10px)' : (isShadowbox ? 'translateZ(20px)' : 'translateZ(10px)'),
             transformStyle: 'preserve-3d'
@@ -500,9 +525,12 @@ export function Customize() {
               <motion.div 
                 key="frames-container"
                 initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: frameScale }}
+                animate={{ opacity: 1, scale: frameScale * userZoom }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.4 }}
+                transition={{ 
+                  opacity: { duration: 0.4 },
+                  scale: { type: "spring", stiffness: 300, damping: 30 }
+                }}
                 className={cn("relative inline-flex items-center justify-center shrink-0 w-full", compareConfig ? "flex-col md:flex-row gap-8 md:gap-16 lg:gap-24" : "")}
                 style={{ 
                   rotateX,
@@ -537,6 +565,37 @@ export function Customize() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Zoom Controls */}
+          {image && !isARMode && (
+            <div className="absolute bottom-6 right-6 flex items-center bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-gray-200/50 p-1.5 z-30">
+              <button 
+                onClick={handleZoomOut}
+                className="p-2 text-gray-500 hover:text-charcoal hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
+                disabled={userZoom <= MIN_ZOOM}
+                title="Zoom Out"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+              <div className="w-px h-4 bg-gray-200 mx-1.5"></div>
+              <button 
+                onClick={handleZoomReset}
+                className="px-3 text-xs font-medium text-gray-600 hover:text-charcoal transition-colors uppercase tracking-wider"
+                title="Reset Zoom"
+              >
+                {Math.round(userZoom * 100)}%
+              </button>
+              <div className="w-px h-4 bg-gray-200 mx-1.5"></div>
+              <button 
+                onClick={handleZoomIn}
+                className="p-2 text-gray-500 hover:text-charcoal hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
+                disabled={userZoom >= MAX_ZOOM}
+                title="Zoom In"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Controls Area (Right) */}
