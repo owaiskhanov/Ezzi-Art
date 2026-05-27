@@ -5,12 +5,22 @@ import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
 
 const FRAME_STYLES = [
-  { id: 'black', name: 'Black Wood', color: '#1a1a1a' },
-  { id: 'walnut', name: 'Walnut Wood', color: '#4a3320' },
-  { id: 'natural', name: 'Natural Oak', color: '#c7b39a' },
-  { id: 'gold', name: 'Vintage Gold', color: '#bfa15f' },
-  { id: 'silver', name: 'Brushed Silver', color: '#e0e0e0' },
-  { id: 'white', name: 'Gallery White', color: '#f5f5f5' },
+  // Wood
+  { id: 'black', name: 'Black Wood', color: '#1a1a1a', material: 'wood' },
+  { id: 'walnut', name: 'Walnut Wood', color: '#4a3320', material: 'wood' },
+  { id: 'natural', name: 'Natural Oak', color: '#c7b39a', material: 'wood' },
+  { id: 'white', name: 'Gallery White', color: '#f5f5f5', material: 'wood' },
+  { id: 'blue-wood', name: 'Blue Wood', color: '#2b4c65', texture: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Blue-Frame.jpg', material: 'wood' },
+  // Steel
+  { id: 'gold', name: 'Vintage Gold', color: '#bfa15f', material: 'steel' },
+  { id: 'silver', name: 'Brushed Silver', color: '#e0e0e0', material: 'steel' },
+];
+
+const STANDARD_SIZES = [
+  { id: '8x10', name: '8" × 10"', width: 8, height: 10 },
+  { id: '11x14', name: '11" × 14"', width: 11, height: 14 },
+  { id: '16x20', name: '16" × 20"', width: 16, height: 20 },
+  { id: '24x36', name: '24" × 36"', width: 24, height: 36 },
 ];
 
 const FRAME_THICKNESS = [
@@ -48,6 +58,7 @@ const WALL_COLORS = [
 
 export function Customize() {
   const [activeTab, setActiveTab] = useState<'size' | 'frame' | 'mat' | 'glass' | 'wall'>('size');
+  const [frameMaterialTab, setFrameMaterialTab] = useState<'wood' | 'steel'>('wood');
   
   // Customization State
   const [image, setImage] = useState<string | null>(null);
@@ -215,13 +226,15 @@ export function Customize() {
                 className="relative shadow-2xl transition-all duration-300 max-w-full max-h-full flex items-center justify-center shrink-0"
                 style={{ 
                   backgroundColor: frameStyle.color,
+                  backgroundImage: frameStyle.texture ? `url(${frameStyle.texture})` : undefined,
+                  backgroundSize: 'cover',
                   padding: frameThickness.value,
                   // Add subtle inner and outer shadows to the frame
                   boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(0,0,0,0.5)'
                 }}
               >
                 {/* Wood Grain Texture Overlay for Frame */}
-                {['walnut', 'natural', 'black'].includes(frameStyle.id) && (
+                {frameStyle.material === 'wood' && !frameStyle.texture && (
                    <div className="absolute inset-0 opacity-20 pointer-events-none" 
                         style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")' }} />
                 )}
@@ -375,31 +388,29 @@ export function Customize() {
                   className="space-y-8"
                 >
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Artwork Dimensions</h3>
-                    <p className="text-sm text-gray-500 mb-6 font-light">Enter the exact dimensions of your artwork in inches. We will build the frame and cut the mat slightly smaller to hold your art perfectly.</p>
+                    <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Standard Sizes</h3>
+                    <p className="text-sm text-gray-500 mb-6 font-light">Select from our ready-to-hang standard market sizes.</p>
                     
-                    <div className="flex items-center gap-4">
-                      <div className="flex-1">
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Width (in)</label>
-                        <input 
-                          type="number" 
-                          min="4" max="60"
-                          value={artWidth}
-                          onChange={(e) => setArtWidth(Math.max(4, Number(e.target.value)))}
-                          className="w-full border border-gray-200 rounded p-3 text-center focus:outline-none focus:ring-1 focus:ring-charcoal focus:border-charcoal transition-all text-lg font-medium"
-                        />
-                      </div>
-                      <div className="text-gray-300 font-light text-2xl mt-6">×</div>
-                      <div className="flex-1">
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Height (in)</label>
-                        <input 
-                          type="number" 
-                          min="4" max="60"
-                          value={artHeight}
-                          onChange={(e) => setArtHeight(Math.max(4, Number(e.target.value)))}
-                          className="w-full border border-gray-200 rounded p-3 text-center focus:outline-none focus:ring-1 focus:ring-charcoal focus:border-charcoal transition-all text-lg font-medium"
-                        />
-                      </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {STANDARD_SIZES.map(size => (
+                        <button
+                          key={size.id}
+                          onClick={() => {
+                            setArtWidth(size.width);
+                            setArtHeight(size.height);
+                          }}
+                          className={cn(
+                            "flex flex-col items-center p-4 border transition-all rounded",
+                            artWidth === size.width && artHeight === size.height 
+                              ? "border-charcoal bg-gray-50 ring-1 ring-charcoal/20" 
+                              : "border-gray-200 hover:border-gray-300 bg-white"
+                          )}
+                        >
+                          <span className={cn("text-lg font-medium", artWidth === size.width && artHeight === size.height ? "text-charcoal" : "text-gray-700")}>
+                            {size.name}
+                          </span>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </motion.div>
@@ -417,9 +428,25 @@ export function Customize() {
                 >
                   {/* Frame Style */}
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Frame Style</h3>
+                    <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wider">Frame Material & Style</h3>
+                    
+                    <div className="flex bg-gray-100 p-1 rounded-lg mb-6">
+                      <button
+                        onClick={() => setFrameMaterialTab('wood')}
+                        className={cn("flex-1 text-xs font-medium py-2 rounded-md transition-all", frameMaterialTab === 'wood' ? "bg-white shadow-sm text-charcoal" : "text-gray-500 hover:text-gray-700")}
+                      >
+                        Wood Frames
+                      </button>
+                      <button
+                        onClick={() => setFrameMaterialTab('steel')}
+                        className={cn("flex-1 text-xs font-medium py-2 rounded-md transition-all", frameMaterialTab === 'steel' ? "bg-white shadow-sm text-charcoal" : "text-gray-500 hover:text-gray-700")}
+                      >
+                        Steel Frames
+                      </button>
+                    </div>
+
                     <div className="grid grid-cols-3 gap-3">
-                      {FRAME_STYLES.map(style => (
+                      {FRAME_STYLES.filter(s => s.material === frameMaterialTab).map(style => (
                         <button
                           key={style.id}
                           onClick={() => setFrameStyle(style)}
@@ -429,8 +456,13 @@ export function Customize() {
                           )}
                         >
                           <div 
-                            className="w-full aspect-video rounded mb-2 shadow-inner border border-gray-100" 
-                            style={{ backgroundColor: style.color }}
+                            className={cn("w-full aspect-video rounded mb-2 shadow-inner border border-gray-100", 
+                              style.texture ? "bg-cover bg-center" : ""
+                            )} 
+                            style={{ 
+                              backgroundColor: style.color,
+                              backgroundImage: style.texture ? `url(${style.texture})` : undefined
+                            }}
                           />
                           <span className="text-[11px] font-medium text-gray-700 text-center leading-tight">{style.name}</span>
                         </button>
