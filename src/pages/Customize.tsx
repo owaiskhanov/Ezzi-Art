@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -63,6 +63,54 @@ export function Customize() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load state from localStorage on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('frameStudioState');
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        if (parsed.image) setImage(parsed.image);
+        if (parsed.artWidth) setArtWidth(parsed.artWidth);
+        if (parsed.artHeight) setArtHeight(parsed.artHeight);
+        if (parsed.frameStyle) setFrameStyle(parsed.frameStyle);
+        if (parsed.frameThickness) setFrameThickness(parsed.frameThickness);
+        if (parsed.matColor) setMatColor(parsed.matColor);
+        if (parsed.matSize) setMatSize(parsed.matSize);
+        if (parsed.glassType) setGlassType(parsed.glassType);
+        if (parsed.wallColor) setWallColor(parsed.wallColor);
+      } catch (e) {
+        console.error("Failed to parse saved state", e);
+      }
+    }
+  }, []);
+
+  // Save state to localStorage when it changes
+  useEffect(() => {
+    const state = {
+      image,
+      artWidth,
+      artHeight,
+      frameStyle,
+      frameThickness,
+      matColor,
+      matSize,
+      glassType,
+      wallColor,
+    };
+    try {
+      localStorage.setItem('frameStudioState', JSON.stringify(state));
+    } catch (e) {
+      console.warn("Storage quota exceeded. Image might be too large to save.", e);
+      // Fallback: save without image if quota is exceeded
+      const stateWithoutImage = { ...state, image: null };
+      try {
+        localStorage.setItem('frameStudioState', JSON.stringify(stateWithoutImage));
+      } catch (err) {
+        console.error("Failed to save state to localStorage", err);
+      }
+    }
+  }, [image, artWidth, artHeight, frameStyle, frameThickness, matColor, matSize, glassType, wallColor]);
+
   // Price Calculation
   const estimatedPrice = useMemo(() => {
     const area = artWidth * artHeight;
@@ -105,6 +153,7 @@ export function Customize() {
     setMatSize(MAT_SIZES[2]);
     setGlassType(GLASS_TYPES[0]);
     setWallColor(WALL_COLORS[1]);
+    localStorage.removeItem('frameStudioState');
   };
 
   const whatsappMessage = encodeURIComponent(
@@ -115,7 +164,8 @@ export function Customize() {
     `- Matting: ${matSize.id === 'none' ? 'None' : `${matSize.name} - ${matColor.name}`}\n` +
     `- Glass: ${glassType.name}\n` +
     `\nEstimated Total: $${estimatedPrice}\n\n` +
-    `Please confirm the next steps to proceed with payment and file transfer.`
+    `*(Please attach your artwork/photo to this chat)*\n\n` +
+    `Please confirm the next steps to proceed with payment.`
   );
 
   return (
@@ -551,9 +601,14 @@ export function Customize() {
             </div>
             
             <a 
-              href={`https://wa.me/91XXXXXXXXXX?text=${whatsappMessage}`} 
+              href={`https://wa.me/919819708112?text=${whatsappMessage}`} 
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => {
+                if (image) {
+                  alert("Please remember to attach your uploaded image to the WhatsApp chat so we can print and frame it!");
+                }
+              }}
               className="w-full flex items-center justify-center gap-2 bg-charcoal text-white px-6 py-3.5 rounded-none font-medium tracking-wide hover:bg-charcoal/90 transition-all shadow-md group"
             >
               <ShoppingBag className="w-4 h-4 group-hover:scale-110 transition-transform" />
