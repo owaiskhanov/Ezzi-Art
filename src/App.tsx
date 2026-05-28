@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import { useEffect } from "react";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
@@ -6,6 +11,7 @@ import { WhatsAppButton } from "./components/WhatsAppButton";
 import { Home } from "./pages/Home";
 import { About } from "./pages/About";
 import { Customize } from "./pages/Customize";
+import { AuthProvider } from "./lib/auth-context";
 
 // Scroll to top on route change
 function ScrollToTop() {
@@ -15,7 +21,7 @@ function ScrollToTop() {
     if (hash) {
       const element = document.querySelector(hash);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+        element.scrollIntoView({ behavior: "smooth" });
       }
     } else {
       window.scrollTo(0, 0);
@@ -27,10 +33,16 @@ function ScrollToTop() {
 
 function Layout() {
   const location = useLocation();
-  const isCustomizePage = location.pathname === '/customize';
+  const isCustomizePage = location.pathname === "/customize";
 
   return (
-    <div className={isCustomizePage ? "flex flex-col font-sans text-charcoal bg-white overflow-hidden fixed inset-0 w-full h-[100dvh]" : "min-h-screen flex flex-col font-sans text-charcoal bg-white"}>
+    <div
+      className={
+        isCustomizePage
+          ? "flex flex-col font-sans text-charcoal bg-white overflow-hidden fixed inset-0 w-full h-[100dvh]"
+          : "min-h-screen flex flex-col font-sans text-charcoal bg-white"
+      }
+    >
       {!isCustomizePage && <Navbar />}
       <div className="flex-1 flex flex-col min-h-0 relative">
         <Routes>
@@ -47,9 +59,11 @@ function Layout() {
 
 export default function App() {
   return (
-    <Router>
-      <ScrollToTop />
-      <Layout />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <ScrollToTop />
+        <Layout />
+      </Router>
+    </AuthProvider>
   );
 }

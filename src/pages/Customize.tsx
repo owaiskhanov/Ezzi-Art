@@ -30,7 +30,7 @@ const FRAME_STYLES = [
   { id: 'walnut', name: 'Walnut Wood', color: '#4a3320', material: 'wood' },
   { id: 'natural', name: 'Natural Oak', color: '#c7b39a', material: 'wood' },
   { id: 'white', name: 'Gallery White', color: '#f5f5f5', material: 'wood' },
-  { id: 'blue-wood', name: 'Blue Wood', color: '#2b4c65', texture: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Blue-Frame.jpg', material: 'wood' },
+  { id: 'blue-wood', name: 'Blue Wood', color: '#2b4c65', texture: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Blue%20Frame.png', material: 'wood' },
   // Steel
   { id: 'gold', name: 'Vintage Gold', color: '#bfa15f', material: 'steel' },
   { id: 'silver', name: 'Brushed Silver', color: '#e0e0e0', material: 'steel' },
