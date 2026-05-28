@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "motion/react";
-import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info, Columns, ZoomIn, ZoomOut, Maximize } from "lucide-react";
+import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info, Columns, ZoomIn, ZoomOut, Maximize, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
 
@@ -31,6 +31,7 @@ const FRAME_STYLES = [
   { id: 'natural', name: 'Natural Oak', color: '#c7b39a', material: 'wood' },
   { id: 'white', name: 'Gallery White', color: '#f5f5f5', material: 'wood' },
   { id: 'blue-wood', name: 'Blue Wood', color: '#2b4c65', texture: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Blue%20Frame.png', material: 'wood' },
+  { id: 'red-wood', name: 'Red Wood', color: '#8b4513', texture: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Seemless-Red-wood.jpg', material: 'wood' },
   // Steel
   { id: 'gold', name: 'Vintage Gold', color: '#bfa15f', material: 'steel' },
   { id: 'silver', name: 'Brushed Silver', color: '#e0e0e0', material: 'steel' },
@@ -128,6 +129,7 @@ export function Customize() {
 
   // Mobile Cart State
   const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
+  const [isPanelMinimized, setIsPanelMinimized] = useState(false);
 
   // 3D Rotation State
   const mouseX = useMotionValue(0);
@@ -484,7 +486,9 @@ export function Customize() {
           ref={previewContainerRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          className="h-[40vh] md:h-[45vh] lg:h-auto lg:flex-1 relative flex items-center justify-center p-4 lg:p-12 overflow-hidden shrink-0"
+          className={cn("relative flex items-center justify-center p-4 lg:p-12 overflow-hidden shrink-0 transition-all duration-300", 
+            isPanelMinimized ? "flex-1" : "h-[45vh] md:h-[50vh] lg:h-auto lg:flex-1 flex-none"
+          )}
           style={{ 
             backgroundColor: isARMode ? 'transparent' : wallColor.color,
             backgroundImage: customWallImage && !isARMode ? `url(${customWallImage})` : undefined,
@@ -599,7 +603,9 @@ export function Customize() {
         </div>
 
         {/* Controls Area (Right) */}
-        <div className="w-full lg:w-[450px] bg-white border-l border-gray-200 flex flex-col flex-1 lg:flex-none lg:h-full overflow-hidden z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.03)] shrink-0">
+        <div className={cn("w-full lg:w-[450px] bg-white border-l border-gray-200 flex flex-col lg:flex-none overflow-hidden z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.03)] shrink-0 transition-all duration-300",
+          isPanelMinimized ? "flex-none lg:h-full" : "flex-1 lg:h-full"
+        )}>
           
           {/* Active Image Status */}
           <div className="p-4 border-b border-gray-100 bg-gray-50/50 shrink-0">
@@ -640,12 +646,21 @@ export function Customize() {
                   </div>
                   <p className="text-xs text-gray-500 mt-1">{image ? 'Custom image loaded' : 'No image selected'}</p>
                 </div>
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="text-xs font-medium bg-white border border-gray-200 px-3 py-1.5 rounded text-charcoal hover:bg-gray-50 transition-colors shadow-sm focus:outline-none"
-                >
-                  {image ? 'Change Art' : 'Upload Art'}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-xs font-medium bg-white border border-gray-200 px-3 py-1.5 rounded text-charcoal hover:bg-gray-50 transition-colors shadow-sm focus:outline-none"
+                  >
+                    {image ? 'Change Art' : 'Upload Art'}
+                  </button>
+                  <button 
+                    onClick={() => setIsPanelMinimized(!isPanelMinimized)}
+                    className="lg:hidden p-1.5 text-gray-500 hover:text-charcoal hover:bg-gray-200 rounded transition-colors ml-1"
+                    title={isPanelMinimized ? "Expand Panel" : "Minimize Panel"}
+                  >
+                    {isPanelMinimized ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                  </button>
+                </div>
                 <input 
                   type="file" 
                   ref={fileInputRef} 
@@ -657,7 +672,7 @@ export function Customize() {
           </div>
 
           {/* Navigation Tabs (Scrollable) */}
-          <div className="flex overflow-x-auto border-b border-gray-200 bg-white z-10 shrink-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className={cn("overflow-x-auto border-b border-gray-200 bg-white z-10 shrink-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]", isPanelMinimized ? "hidden lg:flex" : "flex")}>
             <button 
               onClick={() => setActiveTab('size')}
               className={cn(
@@ -710,7 +725,7 @@ export function Customize() {
           </div>
 
           {/* Tab Content */}
-          <div className="p-4 md:p-6 pb-24 lg:pb-6 flex-1 overflow-y-auto min-h-0 bg-gray-50/30">
+          <div className={cn("p-4 md:p-6 pb-24 lg:pb-6 flex-1 overflow-y-auto min-h-0 bg-gray-50/30", isPanelMinimized ? "hidden lg:block" : "block")}>
             <AnimatePresence mode="wait">
               
               {/* SIZE TAB */}
