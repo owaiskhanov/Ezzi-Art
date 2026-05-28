@@ -609,65 +609,78 @@ export function Customize() {
           
           {/* Active Image Status */}
           <div className="p-4 border-b border-gray-100 bg-gray-50/50 shrink-0">
-             <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-charcoal">Artwork Overview</h3>
-                    <button 
-                      onClick={handleReset} 
-                      className="text-gray-400 hover:text-charcoal p-1 rounded-full hover:bg-gray-200 transition-colors"
-                      title="Reset all choices"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        triggerHaptic();
-                        if (compareConfig) {
-                          setCompareConfig(null);
-                        } else {
-                          setCompareConfig(stateAsConfig);
-                        }
-                      }}
-                      className={cn("p-1.5 rounded-full transition-colors flex items-center gap-1.5 text-xs font-medium ml-2", compareConfig ? "bg-charcoal text-white" : "bg-purple-50 text-purple-600 hover:bg-purple-100")}
-                      title="Compare Configurations"
-                    >
-                      <Columns className="w-3.5 h-3.5" />
-                      {compareConfig ? 'Comparing' : 'Compare'}
-                    </button>
-                    <button
-                      onClick={toggleARMode}
-                      className={cn("p-1.5 rounded-full transition-colors flex items-center gap-1.5 text-xs font-medium ml-2", isARMode ? "bg-charcoal text-white" : "bg-blue-50 text-blue-600 hover:bg-blue-100")}
-                      title="View in AR"
-                    >
-                      <Camera className="w-3.5 h-3.5" />
-                      {isARMode ? 'AR On' : 'AR View'}
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">{image ? 'Custom image loaded' : 'No image selected'}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="text-xs font-medium bg-white border border-gray-200 px-3 py-1.5 rounded text-charcoal hover:bg-gray-50 transition-colors shadow-sm focus:outline-none"
-                  >
-                    {image ? 'Change Art' : 'Upload Art'}
-                  </button>
-                  <button 
-                    onClick={() => setIsPanelMinimized(!isPanelMinimized)}
-                    className="lg:hidden p-1.5 text-gray-500 hover:text-charcoal hover:bg-gray-200 rounded transition-colors ml-1"
-                    title={isPanelMinimized ? "Expand Panel" : "Minimize Panel"}
-                  >
-                    {isPanelMinimized ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                  </button>
-                </div>
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={handleImageUpload} 
-                  accept="image/*" 
-                  className="hidden" 
-                />
+             <div className="flex flex-col gap-3">
+               <div className="flex items-center justify-between">
+                 <div className="flex items-center gap-2">
+                   <h3 className="text-sm font-semibold text-charcoal">Artwork Overview</h3>
+                   <button 
+                     onClick={handleReset} 
+                     className="text-gray-400 hover:text-charcoal p-1 rounded-full hover:bg-gray-200 transition-colors"
+                     title="Reset all choices"
+                   >
+                     <RotateCcw className="w-3 h-3" />
+                   </button>
+                 </div>
+                 
+                 <div className="flex items-center gap-2 lg:hidden">
+                   <button 
+                     onClick={() => setIsPanelMinimized(!isPanelMinimized)}
+                     className="p-1 text-gray-500 hover:text-charcoal hover:bg-gray-200 rounded transition-colors"
+                     title={isPanelMinimized ? "Expand Panel" : "Minimize Panel"}
+                   >
+                     {isPanelMinimized ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                   </button>
+                 </div>
+               </div>
+
+               <div className="flex items-center justify-between">
+                 <div className="flex flex-wrap items-center gap-2">
+                   <button
+                     onClick={() => {
+                       triggerHaptic();
+                       if (compareConfig) {
+                         setCompareConfig(null);
+                       } else {
+                         setCompareConfig(stateAsConfig);
+                       }
+                     }}
+                     className={cn("p-1.5 rounded-full transition-colors flex items-center gap-1.5 text-xs font-medium", compareConfig ? "bg-charcoal text-white" : "bg-purple-50 text-purple-600 hover:bg-purple-100")}
+                     title="Compare Configurations"
+                   >
+                     <Columns className="w-3.5 h-3.5" />
+                     <span className="hidden sm:inline">{compareConfig ? 'Comparing' : 'Compare'}</span>
+                   </button>
+                   <button
+                     onClick={toggleARMode}
+                     className={cn("p-1.5 rounded-full transition-colors flex items-center gap-1.5 text-xs font-medium", isARMode ? "bg-charcoal text-white" : "bg-blue-50 text-blue-600 hover:bg-blue-100")}
+                     title="View in AR"
+                   >
+                     <Camera className="w-3.5 h-3.5" />
+                     <span className="hidden sm:inline">{isARMode ? 'AR On' : 'AR View'}</span>
+                   </button>
+                 </div>
+                 
+                 <div className="flex items-center gap-2 relative">
+                   <p className="text-xs text-gray-500 hidden sm:block absolute right-[110%] w-max whitespace-nowrap overflow-hidden text-ellipsis mr-2">
+                     {image ? 'Custom image loaded' : 'No image selected'}
+                   </p>
+                   <button 
+                     onClick={() => fileInputRef.current?.click()}
+                     className="text-xs font-medium bg-white border border-gray-200 px-3 py-1.5 rounded text-charcoal hover:bg-gray-50 transition-colors shadow-sm focus:outline-none shrink-0 border-b-2"
+                     style={{ borderBottomColor: image ? '#4ade80' : '#e5e7eb' }}
+                   >
+                     {image ? 'Change Art' : 'Upload Art'}
+                   </button>
+                 </div>
+               </div>
+               
+               <input 
+                 type="file" 
+                 ref={fileInputRef} 
+                 onChange={handleImageUpload} 
+                 accept="image/*" 
+                 className="hidden" 
+               />
              </div>
           </div>
 
@@ -676,7 +689,7 @@ export function Customize() {
             <button 
               onClick={() => setActiveTab('size')}
               className={cn(
-                "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
+                "px-4 py-3 lg:px-5 lg:py-4 text-xs lg:text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
                 activeTab === 'size' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
               )}
             >
@@ -685,7 +698,7 @@ export function Customize() {
             <button 
               onClick={() => setActiveTab('frame')}
               className={cn(
-                "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
+                "px-4 py-3 lg:px-5 lg:py-4 text-xs lg:text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
                 activeTab === 'frame' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
               )}
             >
@@ -695,7 +708,7 @@ export function Customize() {
               <button 
                 onClick={() => setActiveTab('mat')}
                 className={cn(
-                  "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
+                  "px-4 py-3 lg:px-5 lg:py-4 text-xs lg:text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
                   activeTab === 'mat' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
                 )}
               >
@@ -706,7 +719,7 @@ export function Customize() {
               <button 
                 onClick={() => setActiveTab('glass')}
                 className={cn(
-                  "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
+                  "px-4 py-3 lg:px-5 lg:py-4 text-xs lg:text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
                   activeTab === 'glass' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
                 )}
               >
@@ -716,7 +729,7 @@ export function Customize() {
             <button 
               onClick={() => setActiveTab('wall')}
               className={cn(
-                "px-5 py-4 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
+                "px-4 py-3 lg:px-5 lg:py-4 text-xs lg:text-sm font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap",
                 activeTab === 'wall' ? "border-charcoal text-charcoal" : "border-transparent text-gray-400 hover:text-gray-600"
               )}
             >
@@ -823,8 +836,8 @@ export function Customize() {
                               printMedium.id === medium.id ? "border-charcoal bg-charcoal text-white" : "border-gray-200 hover:border-gray-300 bg-white"
                             )}
                           >
-                            <span className="text-sm font-medium">{medium.name}</span>
-                            <span className={cn("text-xs mt-1", printMedium.id === medium.id ? "text-white/80" : "text-gray-500")}>{medium.desc}</span>
+                            <span className="text-xs lg:text-sm font-medium">{medium.name}</span>
+                            <span className={cn("text-[10px] lg:text-xs mt-1", printMedium.id === medium.id ? "text-white/80" : "text-gray-500")}>{medium.desc}</span>
                           </motion.button>
                         ))}
                       </div>
@@ -867,8 +880,8 @@ export function Customize() {
                             framingType.id === type.id ? "border-charcoal bg-charcoal text-white" : "border-gray-200 hover:border-gray-300 bg-white"
                           )}
                         >
-                          <span className="text-sm font-medium">{type.name}</span>
-                          <span className={cn("text-xs mt-1", framingType.id === type.id ? "text-white/80" : "text-gray-500")}>{type.desc}</span>
+                          <span className="text-xs lg:text-sm font-medium">{type.name}</span>
+                          <span className={cn("text-[10px] lg:text-xs mt-1", framingType.id === type.id ? "text-white/80" : "text-gray-500")}>{type.desc}</span>
                         </motion.button>
                       ))}
                     </div>
@@ -979,7 +992,7 @@ export function Customize() {
                             matSize.id === size.id ? "border-charcoal bg-charcoal text-white" : "border-gray-200 hover:border-gray-300 bg-white"
                           )}
                         >
-                          <span className="text-sm font-medium block">{size.name}</span>
+                          <span className="text-xs lg:text-sm font-medium block">{size.name}</span>
                         </motion.button>
                       ))}
                     </div>
@@ -1108,8 +1121,8 @@ export function Customize() {
                             glassType.id === g.id ? "border-charcoal bg-charcoal text-white" : "border-gray-200 hover:border-gray-300 bg-white"
                           )}
                         >
-                          <span className="text-sm font-semibold">{g.name}</span>
-                          <span className={cn("text-xs mt-1", glassType.id === g.id ? "text-white/80" : "text-gray-500")}>{g.description}</span>
+                          <span className="text-xs lg:text-sm font-semibold">{g.name}</span>
+                          <span className={cn("text-[10px] lg:text-xs mt-1", glassType.id === g.id ? "text-white/80" : "text-gray-500")}>{g.description}</span>
                         </motion.button>
                       ))}
                     </div>
@@ -1197,10 +1210,12 @@ export function Customize() {
           </div>
 
           {/* Floating Mobile Cart Button */}
-          <div className="lg:hidden fixed bottom-6 right-6 z-40">
+          <div className={cn("lg:hidden fixed left-4 md:left-6 z-40 transition-all duration-300", 
+            isPanelMinimized ? "bottom-[130px] md:bottom-[140px]" : "bottom-6"
+          )}>
             <button 
               onClick={() => setIsMobileCartOpen(true)}
-              className="bg-charcoal text-white p-4 rounded-full shadow-2xl flex items-center justify-center hover:bg-black transition-colors"
+              className="bg-charcoal text-white p-3.5 md:p-4 rounded-full shadow-2xl flex items-center justify-center hover:bg-black transition-colors"
             >
               <ShoppingBag className="w-6 h-6" />
             </button>
