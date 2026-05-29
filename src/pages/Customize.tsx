@@ -385,10 +385,12 @@ export function Customize() {
   ] : [ { ...stateAsConfig, id: "current" } ];
 
   const renderFrameElement = (config: any) => {
+    if (!config || !config.framingType || !config.frameStyle || !config.frameThickness || !config.glassType || !config.printMedium || !config.matColor || !config.matSize || !config.innerMatColor) return null;
+    
     const isWrap = config.framingType.id === 'wrap';
     const isFloater = config.framingType.id === 'floater';
     const isShadowbox = config.framingType.id === 'shadowbox';
-    
+
     return (
       <div 
         key={config.id}
