@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from
 import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info, Columns, ZoomIn, ZoomOut, Maximize, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
-import { auth, signInWithGoogle, saveOrderToFirebase } from '../lib/firebase';
+import { auth, signInWithGoogle, saveOrderToFirebase, logOut } from '../lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
 const Hotspot = ({ top, left, title, description }: { top: string, left: string, title: string, description: string }) => (
@@ -403,27 +403,19 @@ export function Customize() {
       setIsOrdering(true);
       
       try {
-        let currentUser = user;
-        // Attempt to login if not logged in
-        if (!currentUser) {
-          currentUser = await signInWithGoogle();
+        if (user) {
+          const configToSave = { ...stateAsConfig };
+          delete configToSave.image; // Remove large base64 image string before saving to config to avoid hitting 50KB limit.
+          const imageToSave = (image && image.length < 900000) ? image : ''; // Only save if < 900k chars to avoid hitting 1MB rule
+  
+          await saveOrderToFirebase(configToSave, imageToSave);
         }
-
-        const configToSave = { ...stateAsConfig };
-        delete configToSave.image; // Remove large base64 image string before saving to config to avoid hitting 50KB limit.
-        const imageToSave = (image && image.length < 900000) ? image : ''; // Only save if < 900k chars to avoid hitting 1MB rule
-
-        await saveOrderToFirebase(configToSave, imageToSave);
       } catch (err: any) {
-        console.error("Firebase save/auth error:", err);
-        // Continue even if firestore fails so user can at least checkout via Whatsapp
-        alert("Could not save the order directly to your account history (possibly due to popup blockers or size limits), but you can proceed to place the order via WhatsApp.");
+        console.error("Firebase save error:", err);
       }
       
-      if (image) {
-        alert("Please remember to attach your uploaded image to the WhatsApp chat so we can print and frame it!");
-      }
-      window.open(`https://wa.me/919819708112?text=${whatsappMessage}`, '_blank');
+      // Navigate to WhatsApp (using location.href to avoid popup blocker issues)
+      window.location.href = `https://wa.me/919819708112?text=${whatsappMessage}`;
       
     } catch (error) {
       console.error("Unexpected error:", error);
@@ -1328,6 +1320,16 @@ export function Customize() {
             <p className="text-[10px] text-gray-400 text-center mt-3 tracking-wide">
               Secure checkout via WhatsApp link. Free shipping over $150.
             </p>
+            <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+               {user ? (
+                 <div className="flex items-center w-full justify-between">
+                   <span className="text-[10px] text-gray-500 truncate mr-2" title={user.email || ''}>Signed in as {user.email}</span>
+                   <button onClick={() => logOut()} className="text-[10px] text-charcoal hover:underline">Sign out</button>
+                 </div>
+               ) : (
+                 <button onClick={() => signInWithGoogle().catch(e => alert("Login failed. Check popup blockers."))} className="text-[10px] text-charcoal hover:underline text-center w-full">Sign in to sync your order history</button>
+               )}
+            </div>
           </div>
 
           {/* Mobile Cart Bottom Sheet */}
@@ -1383,9 +1385,19 @@ export function Customize() {
                     <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition-transform" />
                     {isOrdering ? "Processing..." : "Place Custom Order"}
                   </a>
-                  <p className="text-center text-xs text-gray-400 mt-4 tracking-wide">
+                  <p className="text-center text-[10px] text-gray-400 mt-4 tracking-wide">
                     Secure checkout via WhatsApp link. Free shipping over $150.
                   </p>
+                  <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                     {user ? (
+                       <div className="flex items-center w-full justify-between">
+                         <span className="text-[10px] text-gray-500 truncate mr-2" title={user.email || ''}>Signed in as {user.email}</span>
+                         <button onClick={() => logOut()} className="text-[10px] text-charcoal hover:underline">Sign out</button>
+                       </div>
+                     ) : (
+                       <button onClick={() => signInWithGoogle().catch(e => alert("Login failed. Check popup blockers."))} className="text-[10px] text-charcoal hover:underline text-center w-full">Sign in to sync your order history</button>
+                     )}
+                  </div>
                 </motion.div>
               </>
             )}
