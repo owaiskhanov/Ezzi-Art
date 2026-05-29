@@ -3,6 +3,8 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from
 import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info, Columns, ZoomIn, ZoomOut, Maximize, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
+import { auth, signInWithGoogle, saveOrderToFirebase } from '../lib/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
 
 const Hotspot = ({ top, left, title, description }: { top: string, left: string, title: string, description: string }) => (
   <div className="absolute z-50 group" style={{ top, left, transform: 'translate(-50%, -50%) translateZ(25px)' }}>
@@ -91,6 +93,16 @@ const triggerHaptic = () => {
 };
 
 export function Customize() {
+  const [user, setUser] = useState<User | null>(null);
+  const [isOrdering, setIsOrdering] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return unsubscribe;
+  }, []);
+
   const [activeTab, setActiveTab] = useState<'size' | 'frame' | 'mat' | 'glass' | 'wall'>('size');
   const [frameMaterialTab, setFrameMaterialTab] = useState<'wood' | 'steel'>('wood');
   
@@ -383,6 +395,44 @@ export function Customize() {
     { ...stateAsConfig, id: "current", label: "Current Configuration" },
     { ...compareConfig, id: "compare", label: "Comparison" }
   ] : [ { ...stateAsConfig, id: "current" } ];
+
+  const handlePlaceOrder = async (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (isOrdering) return;
+    try {
+      setIsOrdering(true);
+      
+      try {
+        let currentUser = user;
+        // Attempt to login if not logged in
+        if (!currentUser) {
+          currentUser = await signInWithGoogle();
+        }
+
+        const configToSave = { ...stateAsConfig };
+        delete configToSave.image; // Remove large base64 image string before saving to config to avoid hitting 50KB limit.
+        const imageToSave = (image && image.length < 900000) ? image : ''; // Only save if < 900k chars to avoid hitting 1MB rule
+
+        await saveOrderToFirebase(configToSave, imageToSave);
+      } catch (err: any) {
+        console.error("Firebase save/auth error:", err);
+        // Continue even if firestore fails so user can at least checkout via Whatsapp
+        alert("Could not save the order directly to your account history (possibly due to popup blockers or size limits), but you can proceed to place the order via WhatsApp.");
+      }
+      
+      if (image) {
+        alert("Please remember to attach your uploaded image to the WhatsApp chat so we can print and frame it!");
+      }
+      window.open(`https://wa.me/919819708112?text=${whatsappMessage}`, '_blank');
+      
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      alert("There was an unexpected error. Please try again.");
+    } finally {
+      setIsOrdering(false);
+      setIsMobileCartOpen(false);
+    }
+  };
 
   const renderFrameElement = (config: any) => {
     if (!config || !config.framingType || !config.frameStyle || !config.frameThickness || !config.glassType || !config.printMedium || !config.matColor || !config.matSize || !config.innerMatColor) return null;
@@ -1268,18 +1318,12 @@ export function Customize() {
             </div>
             
             <a 
-              href={`https://wa.me/919819708112?text=${whatsappMessage}`} 
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                if (image) {
-                  alert("Please remember to attach your uploaded image to the WhatsApp chat so we can print and frame it!");
-                }
-              }}
+              href="#"
+              onClick={handlePlaceOrder}
               className="w-full flex items-center justify-center gap-2 bg-charcoal text-white px-6 py-3.5 rounded-none font-medium tracking-wide hover:bg-charcoal/90 transition-all shadow-md group"
             >
               <ShoppingBag className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              Place Custom Order
+              {isOrdering ? "Processing..." : "Place Custom Order"}
             </a>
             <p className="text-[10px] text-gray-400 text-center mt-3 tracking-wide">
               Secure checkout via WhatsApp link. Free shipping over $150.
@@ -1332,19 +1376,12 @@ export function Customize() {
                   </div>
 
                   <a 
-                    href={`https://wa.me/919819708112?text=${whatsappMessage}`} 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => {
-                      setIsMobileCartOpen(false);
-                      if (image) {
-                        alert("Please remember to attach your uploaded image to the WhatsApp chat so we can print and frame it!");
-                      }
-                    }}
+                    href="#"
+                    onClick={handlePlaceOrder}
                     className="w-full flex items-center justify-center gap-2 bg-charcoal text-white px-6 py-4 rounded-xl font-medium tracking-wide hover:bg-charcoal/90 transition-all shadow-md group text-lg"
                   >
                     <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    Place Custom Order
+                    {isOrdering ? "Processing..." : "Place Custom Order"}
                   </a>
                   <p className="text-center text-xs text-gray-400 mt-4 tracking-wide">
                     Secure checkout via WhatsApp link. Free shipping over $150.
