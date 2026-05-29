@@ -273,16 +273,22 @@ export function Customize() {
     const basePrice = 30; // Base handling fee
     
     let frameRate = 0.5; // per sq inch
-    if (frameThickness.id === 'standard') frameRate = 0.8;
-    if (frameThickness.id === 'thick') frameRate = 1.2;
-    if (frameStyle.id === 'gold' || frameStyle.id === 'silver') frameRate *= 1.3;
+    if (framingType.id === 'wrap') {
+      frameRate = 0.3;
+    } else {
+      if (frameThickness.id === 'standard') frameRate = 0.8;
+      if (frameThickness.id === 'thick') frameRate = 1.2;
+      if (frameStyle.id === 'gold' || frameStyle.id === 'silver') frameRate *= 1.3;
+    }
 
     let matRate = 0;
-    if (matSize.id === 'small') matRate = 0.2;
-    if (matSize.id === 'medium') matRate = 0.3;
-    if (matSize.id === 'large') matRate = 0.5;
+    if (framingType.id !== 'wrap' && framingType.id !== 'floater') {
+      if (matSize.id === 'small') matRate = 0.2;
+      if (matSize.id === 'medium') matRate = 0.3;
+      if (matSize.id === 'large') matRate = 0.5;
+    }
 
-    const glassRate = 0.4 * glassType.multiplier;
+    const glassRate = framingType.id === 'wrap' ? 0 : 0.4 * glassType.multiplier;
 
     const framePrice = Math.round(area * frameRate);
     const matPrice = Math.round(area * matRate);
@@ -291,12 +297,12 @@ export function Customize() {
 
     return {
       base: basePrice,
-      frame: framePrice,
-      mat: matPrice,
-      glass: glassPrice,
+      frame: Math.round(framePrice),
+      mat: Math.round(matPrice),
+      glass: Math.round(glassPrice),
       total: Math.max(30, Math.round(total))
     };
-  }, [artWidth, artHeight, frameThickness, frameStyle, matSize, glassType]);
+  }, [artWidth, artHeight, frameThickness, frameStyle, matSize, glassType, framingType]);
 
   const estimatedPrice = priceBreakdown.total;
 
@@ -1243,8 +1249,12 @@ export function Customize() {
                   <div className="absolute bottom-full left-0 mb-2 w-48 bg-charcoal text-white text-xs rounded p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl z-50">
                     <div className="flex justify-between mb-1"><span>Base & Handling:</span><span>${priceBreakdown.base}</span></div>
                     <div className="flex justify-between mb-1"><span>Frame ({frameStyle.name}):</span><span>${priceBreakdown.frame}</span></div>
-                    <div className="flex justify-between mb-1"><span>Mat ({matSize.name}):</span><span>${priceBreakdown.mat}</span></div>
-                    <div className="flex justify-between font-medium pt-1 mt-1 border-t border-gray-600"><span>Glass ({glassType.name}):</span><span>${priceBreakdown.glass}</span></div>
+                    {framingType.id !== 'wrap' && framingType.id !== 'floater' && matSize.id !== 'none' && (
+                      <div className="flex justify-between mb-1"><span>Mat ({matSize.name}):</span><span>${priceBreakdown.mat}</span></div>
+                    )}
+                    {framingType.id !== 'wrap' && (
+                      <div className="flex justify-between font-medium pt-1 mt-1 border-t border-gray-600"><span>Glass ({glassType.name}):</span><span>${priceBreakdown.glass}</span></div>
+                    )}
                   </div>
                 </h4>
                 <div className="text-3xl font-serif text-charcoal font-medium">${estimatedPrice}</div>
@@ -1299,11 +1309,15 @@ export function Customize() {
                       <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1 flex items-center gap-1 group relative cursor-help w-max">
                         Estimated Total
                         <Info className="w-3.5 h-3.5" />
-                        <div className="absolute bottom-full left-0 mb-2 w-48 bg-charcoal text-white text-xs rounded p-3 opacity-0 group-[.group:hover]:opacity-100 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl z-50">
+                        <div className="absolute bottom-full left-0 mb-2 w-48 bg-charcoal text-white text-xs rounded p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl z-50">
                           <div className="flex justify-between mb-1"><span>Base & Handling:</span><span>${priceBreakdown.base}</span></div>
                           <div className="flex justify-between mb-1"><span>Frame ({frameStyle.name}):</span><span>${priceBreakdown.frame}</span></div>
-                          <div className="flex justify-between mb-1"><span>Mat ({matSize.name}):</span><span>${priceBreakdown.mat}</span></div>
-                          <div className="flex justify-between font-medium pt-1 mt-1 border-t border-gray-600"><span>Glass ({glassType.name}):</span><span>${priceBreakdown.glass}</span></div>
+                          {framingType.id !== 'wrap' && framingType.id !== 'floater' && matSize.id !== 'none' && (
+                            <div className="flex justify-between mb-1"><span>Mat ({matSize.name}):</span><span>${priceBreakdown.mat}</span></div>
+                          )}
+                          {framingType.id !== 'wrap' && (
+                            <div className="flex justify-between font-medium pt-1 mt-1 border-t border-gray-600"><span>Glass ({glassType.name}):</span><span>${priceBreakdown.glass}</span></div>
+                          )}
                         </div>
                       </h4>
                       <div className="text-4xl font-serif text-charcoal font-medium">${estimatedPrice}</div>

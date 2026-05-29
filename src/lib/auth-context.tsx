@@ -44,7 +44,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     try {
       await signInWithPopup(auth, provider);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.code === 'auth/popup-closed-by-user') {
+        // User closed the popup, normally expected behavior, so ignore
+        return;
+      }
       console.error("Error logging in with Google", error);
     }
   };
