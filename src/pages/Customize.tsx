@@ -518,6 +518,15 @@ export function Customize() {
             perspective: '1200px'
           }}
         >
+          {/* Back Home Button */}
+          <Link 
+            to="/" 
+            className="absolute top-4 left-4 lg:top-6 lg:left-6 z-[60] flex items-center justify-center p-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-gray-200 text-charcoal hover:bg-white hover:scale-105 transition-all text-sm focus:outline-none group"
+            title="Back to Home"
+          >
+            <ArrowLeft className="w-4 h-4 text-gray-600 group-hover:text-charcoal" />
+          </Link>
+
           {/* Dynamic Lighting Overlay */}
           {!isARMode && (
             <div 
