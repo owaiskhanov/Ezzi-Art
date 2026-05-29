@@ -3,6 +3,7 @@ import {
   User,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   GoogleAuthProvider,
   signOut,
 } from "firebase/auth";
@@ -49,7 +50,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // User closed the popup, normally expected behavior, so ignore
         return;
       }
+      if (error.code === 'auth/popup-blocked') {
+        alert('Popup blocked by browser. Redirecting to login...');
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      if (error.code === 'auth/unauthorized-domain') {
+        alert('This domain is not authorized for OAuth operations. Please test in preview or add this domain in the Firebase console.');
+        return;
+      }
       console.error("Error logging in with Google", error);
+      alert('Login failed: ' + error.message);
     }
   };
 
