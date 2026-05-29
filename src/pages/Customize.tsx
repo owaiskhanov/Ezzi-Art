@@ -3,8 +3,6 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from
 import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info, Columns, ZoomIn, ZoomOut, Maximize, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
-import { auth, signInWithGoogle, saveOrderToFirebase, logOut } from '../lib/firebase';
-import { onAuthStateChanged, User } from 'firebase/auth';
 
 const Hotspot = ({ top, left, title, description }: { top: string, left: string, title: string, description: string }) => (
   <div className="absolute z-50 group" style={{ top, left, transform: 'translate(-50%, -50%) translateZ(25px)' }}>
@@ -93,16 +91,6 @@ const triggerHaptic = () => {
 };
 
 export function Customize() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isOrdering, setIsOrdering] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return unsubscribe;
-  }, []);
-
   const [activeTab, setActiveTab] = useState<'size' | 'frame' | 'mat' | 'glass' | 'wall'>('size');
   const [frameMaterialTab, setFrameMaterialTab] = useState<'wood' | 'steel'>('wood');
   
@@ -395,36 +383,6 @@ export function Customize() {
     { ...stateAsConfig, id: "current", label: "Current Configuration" },
     { ...compareConfig, id: "compare", label: "Comparison" }
   ] : [ { ...stateAsConfig, id: "current" } ];
-
-  const handlePlaceOrder = async (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
-    e.preventDefault();
-    if (isOrdering) return;
-    try {
-      setIsOrdering(true);
-      
-      try {
-        if (user) {
-          const configToSave = { ...stateAsConfig };
-          delete configToSave.image; // Remove large base64 image string before saving to config to avoid hitting 50KB limit.
-          const imageToSave = (image && image.length < 900000) ? image : ''; // Only save if < 900k chars to avoid hitting 1MB rule
-  
-          await saveOrderToFirebase(configToSave, imageToSave);
-        }
-      } catch (err: any) {
-        console.error("Firebase save error:", err);
-      }
-      
-      // Navigate to WhatsApp (using location.href to avoid popup blocker issues)
-      window.location.href = `https://wa.me/919819708112?text=${whatsappMessage}`;
-      
-    } catch (error) {
-      console.error("Unexpected error:", error);
-      alert("There was an unexpected error. Please try again.");
-    } finally {
-      setIsOrdering(false);
-      setIsMobileCartOpen(false);
-    }
-  };
 
   const renderFrameElement = (config: any) => {
     if (!config || !config.framingType || !config.frameStyle || !config.frameThickness || !config.glassType || !config.printMedium || !config.matColor || !config.matSize || !config.innerMatColor) return null;
@@ -1310,26 +1268,22 @@ export function Customize() {
             </div>
             
             <a 
-              href="#"
-              onClick={handlePlaceOrder}
+              href={`https://wa.me/919819708112?text=${whatsappMessage}`} 
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                if (image) {
+                  alert("Please remember to attach your uploaded image to the WhatsApp chat so we can print and frame it!");
+                }
+              }}
               className="w-full flex items-center justify-center gap-2 bg-charcoal text-white px-6 py-3.5 rounded-none font-medium tracking-wide hover:bg-charcoal/90 transition-all shadow-md group"
             >
               <ShoppingBag className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              {isOrdering ? "Processing..." : "Place Custom Order"}
+              Place Custom Order
             </a>
             <p className="text-[10px] text-gray-400 text-center mt-3 tracking-wide">
               Secure checkout via WhatsApp link. Free shipping over $150.
             </p>
-            <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-               {user ? (
-                 <div className="flex items-center w-full justify-between">
-                   <span className="text-[10px] text-gray-500 truncate mr-2" title={user.email || ''}>Signed in as {user.email}</span>
-                   <button onClick={() => logOut()} className="text-[10px] text-charcoal hover:underline">Sign out</button>
-                 </div>
-               ) : (
-                 <button onClick={() => signInWithGoogle().catch(e => alert("Login failed. Check popup blockers."))} className="text-[10px] text-charcoal hover:underline text-center w-full">Sign in to sync your order history</button>
-               )}
-            </div>
           </div>
 
           {/* Mobile Cart Bottom Sheet */}
@@ -1378,26 +1332,23 @@ export function Customize() {
                   </div>
 
                   <a 
-                    href="#"
-                    onClick={handlePlaceOrder}
+                    href={`https://wa.me/919819708112?text=${whatsappMessage}`} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      setIsMobileCartOpen(false);
+                      if (image) {
+                        alert("Please remember to attach your uploaded image to the WhatsApp chat so we can print and frame it!");
+                      }
+                    }}
                     className="w-full flex items-center justify-center gap-2 bg-charcoal text-white px-6 py-4 rounded-xl font-medium tracking-wide hover:bg-charcoal/90 transition-all shadow-md group text-lg"
                   >
                     <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    {isOrdering ? "Processing..." : "Place Custom Order"}
+                    Place Custom Order
                   </a>
-                  <p className="text-center text-[10px] text-gray-400 mt-4 tracking-wide">
+                  <p className="text-center text-xs text-gray-400 mt-4 tracking-wide">
                     Secure checkout via WhatsApp link. Free shipping over $150.
                   </p>
-                  <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                     {user ? (
-                       <div className="flex items-center w-full justify-between">
-                         <span className="text-[10px] text-gray-500 truncate mr-2" title={user.email || ''}>Signed in as {user.email}</span>
-                         <button onClick={() => logOut()} className="text-[10px] text-charcoal hover:underline">Sign out</button>
-                       </div>
-                     ) : (
-                       <button onClick={() => signInWithGoogle().catch(e => alert("Login failed. Check popup blockers."))} className="text-[10px] text-charcoal hover:underline text-center w-full">Sign in to sync your order history</button>
-                     )}
-                  </div>
                 </motion.div>
               </>
             )}
