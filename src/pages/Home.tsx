@@ -1,7 +1,8 @@
 import { motion, useScroll, useTransform, useInView, animate, AnimatePresence } from "motion/react";
 import { Link } from "react-router-dom";
-import { ShieldCheck, Star, BugOff, Palette, Droplets, HeartHandshake, Play, VolumeX, Volume2 } from "lucide-react";
+import { ShieldCheck, Star, BugOff, Palette, Droplets, HeartHandshake, Play, VolumeX, Volume2, MapPin, Phone, Mail, Clock } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
+import { ContactMap } from "../components/ContactMap";
 
 function AnimatedCounter({ value, suffix = "", format = true }: { value: number, suffix?: string, format?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -341,22 +342,19 @@ export function Home() {
           </motion.div>
 
           {/* Mobile View: Vertical Sticky Stack */}
-          <div className="md:hidden relative pb-[15vh] px-4">
-            <div className="flex flex-col">
+          <div className="md:hidden relative px-4 pb-[20vh] pt-8">
+            <div className="flex flex-col gap-[80vh]">
               {[
                 { id: 1, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/Beautiful%20frames,%20premium%20mouldings,%20timeless%20artwork,%20looks%20like%20your%20walls%20just%20found%20their%20pe.mp4", handle: "@abdul kadeer", title: "Call me maybe" },
                 { id: 2, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/From%20artwork%20and%20photos%20abd.mp4", handle: "@abdul kadeer", title: "Call me 10 things you should do" },
                 { id: 3, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/These%20frames%20Just%20a%20small.mp4", handle: "@ezziartsandframe", title: "Light up the frame" },
                 { id: 4, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/When%20the%20boss%20is%20watching.mp4", handle: "@ezziartsandframe", title: "Behind the scenes" },
-              ].map((video, idx, arr) => (
+              ].map((video, idx) => (
                 <div 
                   key={video.id} 
-                  className="sticky w-full max-w-sm mx-auto shadow-2xl rounded-2xl"
+                  className="sticky top-[12vh] w-full max-w-[320px] mx-auto rounded-2xl shadow-2xl"
                   style={{ 
-                    zIndex: idx + 10,
-                    top: '12vh', // Fixes them to overlap completely
-                    marginTop: idx === 0 ? '4vh' : '70vh', // Initial large spacing to give room to scroll
-                    marginBottom: idx === arr.length - 1 ? '10vh' : '0'
+                    zIndex: idx + 10
                   }}
                 >
                   <UGCVideoCard video={video} />
@@ -365,27 +363,16 @@ export function Home() {
             </div>
           </div>
 
-          {/* Desktop View: Horizontal Scroller */}
-          <div className="hidden md:block relative -mx-12 lg:-mx-24 group">
-            {/* Edge fade gradients for sleek look */}
-            <div className="absolute top-0 bottom-16 left-0 w-24 lg:w-48 bg-gradient-to-r from-charcoal via-charcoal/80 to-transparent z-10 pointer-events-none transition-opacity duration-500 opacity-0 group-hover:opacity-100" />
-            <div className="absolute top-0 bottom-16 right-0 w-24 lg:w-48 bg-gradient-to-l from-charcoal via-charcoal/80 to-transparent z-10 pointer-events-none transition-opacity duration-500 opacity-0 group-hover:opacity-100" />
-            
-            <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-16 pt-8 px-12 lg:px-64 gap-8 lg:gap-12 relative" style={{ scrollBehavior: 'smooth' }}>
-              {[
-                { id: 1, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/Beautiful%20frames,%20premium%20mouldings,%20timeless%20artwork,%20looks%20like%20your%20walls%20just%20found%20their%20pe.mp4", handle: "@abdul kadeer", title: "Call me maybe" },
-                { id: 2, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/From%20artwork%20and%20photos%20abd.mp4", handle: "@abdul kadeer", title: "Call me 10 things you should do" },
-                { id: 3, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/These%20frames%20Just%20a%20small.mp4", handle: "@ezziartsandframe", title: "Light up the frame" },
-                { id: 4, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/When%20the%20boss%20is%20watching.mp4", handle: "@ezziartsandframe", title: "Behind the scenes" },
-              ].map((video) => (
-                <div 
-                  key={video.id} 
-                  className="flex-shrink-0 w-[45vw] lg:w-[360px] snap-center hover:-translate-y-4 transition-transform duration-700 ease-out"
-                >
-                  <UGCVideoCard video={video} />
-                </div>
-              ))}
-            </div>
+          {/* Desktop View: Grid */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { id: 1, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/Beautiful%20frames,%20premium%20mouldings,%20timeless%20artwork,%20looks%20like%20your%20walls%20just%20found%20their%20pe.mp4", handle: "@abdul kadeer", title: "Call me maybe" },
+              { id: 2, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/From%20artwork%20and%20photos%20abd.mp4", handle: "@abdul kadeer", title: "Call me 10 things you should do" },
+              { id: 3, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/These%20frames%20Just%20a%20small.mp4", handle: "@ezziartsandframe", title: "Light up the frame" },
+              { id: 4, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/When%20the%20boss%20is%20watching.mp4", handle: "@ezziartsandframe", title: "Behind the scenes" },
+            ].map((video) => (
+              <UGCVideoCard key={video.id} video={video} />
+            ))}
           </div>
         </div>
       </section>
@@ -541,7 +528,83 @@ export function Home() {
         </div>
       </section>
 
-      {/* SECTION 8 — FINAL CTA BANNER */}
+      {/* SECTION 8 — CONTACT & LOCATION */}
+      <section id="contact" className="py-24 bg-white border-y border-gray-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Contact Information */}
+            <motion.div 
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={staggerContainer}
+              className="order-2 lg:order-1"
+            >
+              <div className="mb-12">
+                <span className="text-gold-light text-xs font-medium tracking-[0.3em] uppercase mb-4 block">
+                  VISIT OUR STUDIO
+                </span>
+                <h2 className="text-4xl md:text-5xl font-serif text-charcoal mb-6">
+                  Come Experience The Craft
+                </h2>
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  We invite you to our Mumbai studio to explore our premium collection of mouldings, archival mats, and museum-quality glass. Our experts are ready to guide you through the perfect framing choices.
+                </p>
+              </div>
+
+              <div className="space-y-8">
+                <motion.div variants={fadeInUp} className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-offwhite flex items-center justify-center text-gold-light shrink-0">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-serif text-xl text-charcoal mb-2">Location</h4>
+                    <p className="text-gray-600 leading-relaxed">
+                      S No 811/A, Shop No 5, Opposite Alankar Theater,<br />
+                      Gol Deval, Mumbai, Maharashtra 400004
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div variants={fadeInUp} className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-offwhite flex items-center justify-center text-gold-light shrink-0">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-serif text-xl text-charcoal mb-2">Opening Hours</h4>
+                    <p className="text-gray-600">Monday - Saturday: 10:00 AM - 8:00 PM</p>
+                    <p className="text-gray-600">Sunday: Closed</p>
+                  </div>
+                </motion.div>
+
+                <motion.div variants={fadeInUp} className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-offwhite flex items-center justify-center text-gold-light shrink-0">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-serif text-xl text-charcoal mb-2">Contact</h4>
+                    <p className="text-gray-600 mb-1">022-32171624</p>
+                    <p className="text-gray-600">hello@ezziarts.com</p>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* Map Container */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="order-1 lg:order-2 h-full w-full rounded-2xl overflow-hidden shadow-2xl relative"
+            >
+               <ContactMap />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 9 — FINAL CTA BANNER */}
       <section className="py-40 bg-charcoal relative overflow-hidden flex items-center justify-center">
         {/* Subtle pattern overlay */}
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(#D4AF37 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
