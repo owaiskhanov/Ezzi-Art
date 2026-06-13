@@ -308,8 +308,8 @@ export function Home() {
       </section>
 
       {/* SECTION 4 — UGC VIDEOS / SOCIAL PROOF */}
-      <section className="py-32 relative overflow-hidden bg-charcoal">
-        <div className="absolute inset-0 z-0">
+      <section className="py-24 relative bg-charcoal">
+        <div className="absolute inset-0 z-0 overflow-hidden">
           <motion.div 
             animate={{
               backgroundPosition: ["0% 0%", "100% 100%"],
@@ -336,18 +336,49 @@ export function Home() {
               In The Wild
             </motion.span>
             <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl font-serif text-white mb-6">
-              Loved by <span className="italic font-light text-white/90">Creators</span>
+              UGC <span className="italic font-light text-white/90">Content</span>
             </motion.h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Mobile View: Vertical Sticky Stack */}
+          <div className="md:hidden relative pb-[15vh] px-4">
+            <div className="flex flex-col">
+              {[
+                { id: 1, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/Beautiful%20frames,%20premium%20mouldings,%20timeless%20artwork,%20looks%20like%20your%20walls%20just%20found%20their%20pe.mp4", handle: "@abdul kadeer", title: "Call me maybe" },
+                { id: 2, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/From%20artwork%20and%20photos%20abd.mp4", handle: "@abdul kadeer", title: "Call me 10 things you should do" },
+                { id: 3, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/These%20frames%20Just%20a%20small.mp4", handle: "@ezziartsandframe", title: "Light up the frame" },
+                { id: 4, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/When%20the%20boss%20is%20watching.mp4", handle: "@ezziartsandframe", title: "Behind the scenes" },
+              ].map((video, idx, arr) => (
+                <div 
+                  key={video.id} 
+                  className="sticky w-full max-w-sm mx-auto shadow-2xl rounded-2xl"
+                  style={{ 
+                    zIndex: idx + 10,
+                    top: '12vh', // Fixes them to overlap completely
+                    marginTop: idx === 0 ? '4vh' : '70vh', // Initial large spacing to give room to scroll
+                    marginBottom: idx === arr.length - 1 ? '10vh' : '0'
+                  }}
+                >
+                  <UGCVideoCard video={video} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop View: Horizontal Scroller */}
+          <div className="hidden md:flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-16 pt-4 -mx-12 px-12 lg:-mx-24 lg:px-24 gap-8 relative" style={{ scrollBehavior: 'smooth' }}>
             {[
-              { id: 1, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/Beautiful%20frames,%20premium%20mouldings,%20timeless%20artwork,%20looks%20like%20your%20walls%20just%20found%20their%20pe.mp4", handle: "@design.muse", title: "Premium Mouldings" },
-              { id: 2, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/From%20artwork%20and%20photos%20abd.mp4", handle: "@space_curator", title: "Artwork & Photos" },
-              { id: 3, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/These%20frames%20Just%20a%20small.mp4", handle: "@the_framed_life", title: "Frame Collection" },
-              { id: 4, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/When%20the%20boss%20is%20watching.mp4", handle: "@ezziart_studio", title: "Behind the Scenes" },
+              { id: 1, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/Beautiful%20frames,%20premium%20mouldings,%20timeless%20artwork,%20looks%20like%20your%20walls%20just%20found%20their%20pe.mp4", handle: "@abdul kadeer", title: "Call me maybe" },
+              { id: 2, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/From%20artwork%20and%20photos%20abd.mp4", handle: "@abdul kadeer", title: "Call me 10 things you should do" },
+              { id: 3, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/These%20frames%20Just%20a%20small.mp4", handle: "@ezziartsandframe", title: "Light up the frame" },
+              { id: 4, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/When%20the%20boss%20is%20watching.mp4", handle: "@ezziartsandframe", title: "Behind the scenes" },
             ].map((video) => (
-              <UGCVideoCard key={video.id} video={video} />
+              <div 
+                key={video.id} 
+                className="flex-shrink-0 w-[40vw] lg:w-[320px] snap-center hover:-translate-y-2 transition-transform duration-500 ease-out"
+              >
+                <UGCVideoCard video={video} />
+              </div>
             ))}
           </div>
         </div>
@@ -377,7 +408,7 @@ export function Home() {
             className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-white/20"
           >
             {[
-              { value: 100000, suffix: "+", label: "Frames Sold" },
+              { value: 97000, suffix: "+", label: "Frames Sold" },
               { value: 100, suffix: "+", label: "Design Options" },
               { value: 15, suffix: "+", label: "Years of Experience" },
               { value: 50, suffix: "+", label: "Product Innovations" },
@@ -454,6 +485,18 @@ export function Home() {
                 aria-label={`Go to testimonial ${idx + 1}`}
               />
             ))}
+          </div>
+
+          <div className="flex justify-center mt-12">
+            <a 
+              href="https://www.google.com/search?q=ezzi+arts+anf+rame&oq=ezzi+arts+anf+rame+&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIGCAEQRRg5MggIAhAAGBYYHjIHCAMQABjvBTIHCAQQABjvBTIHCAUQABjvBTIGCAYQRRhA0gEINDUyNWowajeoAgCwAgE&sourceid=chrome&ie=UTF-8&source=chrome.ob#lrd=0x3be7cf35eeacb535:0x944a35717935e199,1,,,,"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-3 bg-white border border-gray-200 text-charcoal px-8 py-4 text-sm font-medium tracking-wide uppercase hover:border-gold-light hover:text-gold-light transition-colors shadow-sm"
+            >
+              <span>Read more reviews on Google</span>
+              <Star className="w-4 h-4 fill-current" />
+            </a>
           </div>
         </div>
       </section>
