@@ -3,6 +3,41 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from
 import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info, Columns, ZoomIn, ZoomOut, Maximize, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
+import { useAuth } from "../lib/auth-context";
+
+function ImageWithSkeleton({ src, alt, className, style, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // We should reset load state when src changes
+  useEffect(() => {
+    setIsLoaded(false);
+  }, [src]);
+
+  return (
+    <div className={`relative ${className}`} style={{ ...style, overflow: 'hidden' }}>
+      <AnimatePresence>
+        {!isLoaded && src && (
+          <motion.div
+            initial={{ opacity: 0.5 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
+            className="absolute inset-0 bg-gray-200/50 backdrop-blur-md rounded-inherit z-0"
+          />
+        )}
+      </AnimatePresence>
+      {src && (
+        <img
+          src={src}
+          alt={alt}
+          className={`w-full h-full object-cover transition-opacity duration-500 relative z-10 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setIsLoaded(true)}
+          {...props}
+        />
+      )}
+    </div>
+  );
+}
 
 const Hotspot = ({ top, left, title, description }: { top: string, left: string, title: string, description: string }) => (
   <div className="absolute z-50 group" style={{ top, left, transform: 'translate(-50%, -50%) translateZ(25px)' }}>
@@ -91,6 +126,7 @@ const triggerHaptic = () => {
 };
 
 export function Customize() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'size' | 'frame' | 'mat' | 'glass' | 'wall'>('size');
   const [frameMaterialTab, setFrameMaterialTab] = useState<'wood' | 'steel'>('wood');
   
@@ -373,6 +409,45 @@ export function Customize() {
     `Please confirm the next steps to proceed with payment.`
   );
 
+  const handlePlaceOrder = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // We let the link open in a new tab by not preventing default
+    if (image) {
+      alert("Please remember to attach your uploaded image to the WhatsApp chat so we can print and frame it!");
+    }
+    
+    // Attempt to notify user via email
+    let userEmail = user?.email;
+    if (!userEmail) {
+      const emailPrompt = window.prompt("Enter your email address to receive an order summary:");
+      if (emailPrompt) {
+        userEmail = emailPrompt;
+      }
+    }
+
+    if (userEmail) {
+      try {
+        await fetch('/api/order-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: userEmail,
+            orderDetails: {
+              width: artWidth,
+              height: artHeight,
+              frameName: frameStyle.name,
+              framingTypeName: framingType.name,
+              matName: matSize.name,
+              glassName: glassType.name,
+              estimatedPrice
+            }
+          })
+        });
+      } catch (err) {
+        console.error("Could not send email notification.", err);
+      }
+    }
+  };
+
   const frameScale = useMemo(() => {
     const area = artWidth * artHeight;
     return Math.min(1.05, Math.max(0.65, 0.65 + (area / 3000)));
@@ -481,10 +556,10 @@ export function Customize() {
                <div className="absolute inset-0 opacity-[0.2] mix-blend-multiply pointer-events-none z-10" 
                     style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/woven-light.png")' }} />
             )}
-            <img 
+            <ImageWithSkeleton 
               src={config.image} 
               alt="Your Art" 
-              className={cn("block object-cover", compareConfig ? "h-[15vh] md:h-[20vh] lg:h-[35vh] xl:h-[40vh]" : "h-[20vh] md:h-[25vh] lg:h-[45vh] xl:h-[50vh]")}
+              className={cn("block", compareConfig ? "h-[15vh] md:h-[20vh] lg:h-[35vh] xl:h-[40vh]" : "h-[20vh] md:h-[25vh] lg:h-[45vh] xl:h-[50vh]")}
               style={{
                 aspectRatio: `${config.artWidth} / ${config.artHeight}`,
                 width: 'auto',
@@ -1280,11 +1355,7 @@ export function Customize() {
               href={`https://wa.me/919819708112?text=${whatsappMessage}`} 
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => {
-                if (image) {
-                  alert("Please remember to attach your uploaded image to the WhatsApp chat so we can print and frame it!");
-                }
-              }}
+              onClick={handlePlaceOrder}
               className="w-full flex items-center justify-center gap-2 bg-charcoal text-white px-6 py-3.5 rounded-none font-medium tracking-wide hover:bg-charcoal/90 transition-all shadow-md group"
             >
               <ShoppingBag className="w-4 h-4 group-hover:scale-110 transition-transform" />
@@ -1344,11 +1415,9 @@ export function Customize() {
                     href={`https://wa.me/919819708112?text=${whatsappMessage}`} 
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => {
+                    onClick={(e) => {
                       setIsMobileCartOpen(false);
-                      if (image) {
-                        alert("Please remember to attach your uploaded image to the WhatsApp chat so we can print and frame it!");
-                      }
+                      handlePlaceOrder(e);
                     }}
                     className="w-full flex items-center justify-center gap-2 bg-charcoal text-white px-6 py-4 rounded-xl font-medium tracking-wide hover:bg-charcoal/90 transition-all shadow-md group text-lg"
                   >

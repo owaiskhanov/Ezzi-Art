@@ -1,6 +1,6 @@
-import { motion, useScroll, useTransform, useInView, animate } from "motion/react";
+import { motion, useScroll, useTransform, useInView, animate, AnimatePresence } from "motion/react";
 import { Link } from "react-router-dom";
-import { ShieldCheck, Star, BugOff, Palette, Droplets, HeartHandshake } from "lucide-react";
+import { ShieldCheck, Star, BugOff, Palette, Droplets, HeartHandshake, Play, VolumeX, Volume2 } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
 
 function AnimatedCounter({ value, suffix = "", format = true }: { value: number, suffix?: string, format?: boolean }) {
@@ -38,6 +38,88 @@ const staggerContainer = {
     transition: { staggerChildren: 0.15 }
   }
 };
+
+function ImageWithSkeleton({ src, alt, className, style, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  return (
+    <div className={`relative ${className}`} style={style}>
+      <AnimatePresence>
+        {!isLoaded && (
+          <motion.div
+            initial={{ opacity: 0.5 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
+            className="absolute inset-0 bg-gray-200/20 backdrop-blur-md rounded-inherit"
+          />
+        )}
+      </AnimatePresence>
+      <img
+        src={src}
+        alt={alt}
+        className={`w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        onLoad={() => setIsLoaded(true)}
+        {...props}
+      />
+    </div>
+  );
+}
+
+function UGCVideoCard({ video }: { video: { id: number, url: string, handle: string, title: string } }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isMuted, setIsMuted] = useState(true);
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+    }
+  };
+
+  return (
+    <motion.div 
+      variants={fadeInUp}
+      whileHover={{ y: -10, scale: 1.02 }}
+      className="relative group cursor-pointer rounded-2xl overflow-hidden aspect-[9/16] shadow-2xl"
+      onClick={toggleMute}
+    >
+      <div className="absolute inset-0 bg-gray-900">
+        <video 
+          ref={videoRef}
+          src={video.url}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700" 
+        />
+      </div>
+      
+      {/* Glassmorphism Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity duration-500" />
+      
+      {/* Sound Toggle Button (Glass) */}
+      <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center transform group-hover:scale-110 transition-transform duration-500 z-20 overflow-hidden">
+         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+         {isMuted ? (
+           <VolumeX className="w-4 h-4 text-white relative z-10" />
+         ) : (
+           <Volume2 className="w-4 h-4 text-white relative z-10" />
+         )}
+      </div>
+
+      <div className="absolute bottom-6 left-6 right-6 z-20">
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 transform translate-y-2 group-hover:translate-y-0 transition-all duration-500 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+          <p className="text-white font-medium text-sm">{video.title}</p>
+          <p className="text-white/60 text-xs mt-1">{video.handle}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export function Home() {
   const heroRef = useRef(null);
@@ -99,10 +181,10 @@ export function Home() {
             animate={{ scale: 1.15 }}
             transition={{ duration: 30, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
           >
-            <img 
+            <ImageWithSkeleton 
               src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=2000&auto=format&fit=crop" 
               alt="Beautifully framed image in elegant interior" 
-              className="w-full h-full object-cover"
+              className="w-full h-full"
               referrerPolicy="no-referrer"
             />
           </motion.div>
@@ -225,16 +307,62 @@ export function Home() {
         </div>
       </section>
 
+      {/* SECTION 4 — UGC VIDEOS / SOCIAL PROOF */}
+      <section className="py-32 relative overflow-hidden bg-charcoal">
+        <div className="absolute inset-0 z-0">
+          <motion.div 
+            animate={{
+              backgroundPosition: ["0% 0%", "100% 100%"],
+            }}
+            transition={{ duration: 20, repeat: Infinity, repeatType: "reverse", ease: "linear" }}
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage: 'radial-gradient(circle at 50% 50%, #4a5d4e 0%, transparent 50%), radial-gradient(circle at 80% 20%, #d4af37 0%, transparent 40%)',
+              backgroundSize: '200% 200%',
+              filter: 'blur(60px)'
+            }}
+          />
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-6 relative z-20">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={staggerContainer}
+            className="mb-16"
+          >
+            <motion.span variants={fadeInUp} className="text-gold-light text-xs font-medium tracking-[0.3em] uppercase mb-4 block">
+              In The Wild
+            </motion.span>
+            <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl font-serif text-white mb-6">
+              Loved by <span className="italic font-light text-white/90">Creators</span>
+            </motion.h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { id: 1, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/Beautiful%20frames,%20premium%20mouldings,%20timeless%20artwork,%20looks%20like%20your%20walls%20just%20found%20their%20pe.mp4", handle: "@design.muse", title: "Premium Mouldings" },
+              { id: 2, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/From%20artwork%20and%20photos%20abd.mp4", handle: "@space_curator", title: "Artwork & Photos" },
+              { id: 3, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/These%20frames%20Just%20a%20small.mp4", handle: "@the_framed_life", title: "Frame Collection" },
+              { id: 4, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/When%20the%20boss%20is%20watching.mp4", handle: "@ezziart_studio", title: "Behind the Scenes" },
+            ].map((video) => (
+              <UGCVideoCard key={video.id} video={video} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* SECTION 5 — STATS BAR */}
       <section ref={statsRef} className="relative py-24 bg-charcoal overflow-hidden">
         <motion.div 
           className="absolute inset-0 z-0 opacity-20"
           style={{ y: statsY }}
         >
-          <img 
+          <ImageWithSkeleton 
             src="https://images.unsplash.com/photo-1582561424760-0321d6cb28cb?q=80&w=2000&auto=format&fit=crop" 
             alt="Workshop background" 
-            className="w-full h-full object-cover grayscale scale-125"
+            className="w-full h-full grayscale scale-125"
             referrerPolicy="no-referrer"
           />
         </motion.div>
