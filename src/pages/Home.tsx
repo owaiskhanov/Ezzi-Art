@@ -366,20 +366,26 @@ export function Home() {
           </div>
 
           {/* Desktop View: Horizontal Scroller */}
-          <div className="hidden md:flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-16 pt-4 -mx-12 px-12 lg:-mx-24 lg:px-24 gap-8 relative" style={{ scrollBehavior: 'smooth' }}>
-            {[
-              { id: 1, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/Beautiful%20frames,%20premium%20mouldings,%20timeless%20artwork,%20looks%20like%20your%20walls%20just%20found%20their%20pe.mp4", handle: "@abdul kadeer", title: "Call me maybe" },
-              { id: 2, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/From%20artwork%20and%20photos%20abd.mp4", handle: "@abdul kadeer", title: "Call me 10 things you should do" },
-              { id: 3, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/These%20frames%20Just%20a%20small.mp4", handle: "@ezziartsandframe", title: "Light up the frame" },
-              { id: 4, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/When%20the%20boss%20is%20watching.mp4", handle: "@ezziartsandframe", title: "Behind the scenes" },
-            ].map((video) => (
-              <div 
-                key={video.id} 
-                className="flex-shrink-0 w-[40vw] lg:w-[320px] snap-center hover:-translate-y-2 transition-transform duration-500 ease-out"
-              >
-                <UGCVideoCard video={video} />
-              </div>
-            ))}
+          <div className="hidden md:block relative -mx-12 lg:-mx-24 group">
+            {/* Edge fade gradients for sleek look */}
+            <div className="absolute top-0 bottom-16 left-0 w-24 lg:w-48 bg-gradient-to-r from-charcoal via-charcoal/80 to-transparent z-10 pointer-events-none transition-opacity duration-500 opacity-0 group-hover:opacity-100" />
+            <div className="absolute top-0 bottom-16 right-0 w-24 lg:w-48 bg-gradient-to-l from-charcoal via-charcoal/80 to-transparent z-10 pointer-events-none transition-opacity duration-500 opacity-0 group-hover:opacity-100" />
+            
+            <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-16 pt-8 px-12 lg:px-64 gap-8 lg:gap-12 relative" style={{ scrollBehavior: 'smooth' }}>
+              {[
+                { id: 1, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/Beautiful%20frames,%20premium%20mouldings,%20timeless%20artwork,%20looks%20like%20your%20walls%20just%20found%20their%20pe.mp4", handle: "@abdul kadeer", title: "Call me maybe" },
+                { id: 2, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/From%20artwork%20and%20photos%20abd.mp4", handle: "@abdul kadeer", title: "Call me 10 things you should do" },
+                { id: 3, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/These%20frames%20Just%20a%20small.mp4", handle: "@ezziartsandframe", title: "Light up the frame" },
+                { id: 4, url: "https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/UGC/When%20the%20boss%20is%20watching.mp4", handle: "@ezziartsandframe", title: "Behind the scenes" },
+              ].map((video) => (
+                <div 
+                  key={video.id} 
+                  className="flex-shrink-0 w-[45vw] lg:w-[360px] snap-center hover:-translate-y-4 transition-transform duration-700 ease-out"
+                >
+                  <UGCVideoCard video={video} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
