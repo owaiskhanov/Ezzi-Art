@@ -1,7 +1,7 @@
 import { motion, useScroll, useTransform, useInView, animate, AnimatePresence } from "motion/react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, Star, BugOff, Palette, Droplets, HeartHandshake, Play, VolumeX, Volume2, MapPin, Phone, Mail, Clock } from "lucide-react";
-import { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { ContactMap } from "../components/ContactMap";
 
 function AnimatedCounter({ value, suffix = "", format = true }: { value: number, suffix?: string, format?: boolean }) {
@@ -29,7 +29,7 @@ function AnimatedCounter({ value, suffix = "", format = true }: { value: number,
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.2, 0.65, 0.3, 0.9] } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.2, 0.65, 0.3, 0.9] as const } }
 };
 
 const staggerContainer = {
@@ -67,7 +67,7 @@ function ImageWithSkeleton({ src, alt, className, style, ...props }: React.ImgHT
   );
 }
 
-function UGCVideoCard({ video }: { video: { id: number, url: string, handle: string, title: string } }) {
+const UGCVideoCard: React.FC<{ video: { id: number, url: string, handle: string, title: string } }> = ({ video }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
 
@@ -439,7 +439,7 @@ export function Home() {
           <div 
             ref={scrollContainerRef}
             onScroll={handleTestimonialScroll}
-            className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-12 -mx-6 px-6 md:px-[10vw] gap-8"
+            className="relative flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-12 -mx-6 px-6 md:px-[10vw] gap-8"
           >
             {testimonials.map((testimonial, idx) => (
               <motion.div 
