@@ -669,13 +669,13 @@ export function Customize() {
                 <p className="text-gray-500 mb-8 font-light text-center">
                   Upload a photo of your artwork or picture to visualize how it looks with our premium frames and matting.
                 </p>
-                <label 
-                  htmlFor="art-upload"
-                  className="bg-charcoal text-white px-8 py-3.5 rounded-none font-medium tracking-wide hover:bg-charcoal/90 transition-all shadow-md hover:shadow-lg flex items-center gap-3 w-full justify-center cursor-pointer"
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-charcoal text-white px-8 py-3.5 rounded-none font-medium tracking-wide hover:bg-charcoal/90 transition-all shadow-md hover:shadow-lg flex items-center gap-3 w-full justify-center"
                 >
                   <Upload className="w-5 h-5" />
                   Upload Photo
-                </label>
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -774,13 +774,13 @@ export function Customize() {
                    <p className="text-xs text-gray-500 hidden sm:block absolute right-[110%] w-max whitespace-nowrap overflow-hidden text-ellipsis mr-2">
                      {image ? 'Custom image loaded' : 'No image selected'}
                    </p>
-                   <label 
-                     htmlFor="art-upload"
-                     className="text-xs font-medium bg-white border border-gray-200 px-3 py-1.5 rounded text-charcoal hover:bg-gray-50 transition-colors shadow-sm focus:outline-none shrink-0 border-b-2 cursor-pointer"
+                   <button 
+                     onClick={() => fileInputRef.current?.click()}
+                     className="text-xs font-medium bg-white border border-gray-200 px-3 py-1.5 rounded text-charcoal hover:bg-gray-50 transition-colors shadow-sm focus:outline-none shrink-0 border-b-2"
                      style={{ borderBottomColor: image ? '#4ade80' : '#e5e7eb' }}
                    >
                      {image ? 'Change Art' : 'Upload Art'}
-                   </label>
+                   </button>
                  </div>
                </div>
                
@@ -1256,14 +1256,14 @@ export function Customize() {
                     <p className="text-sm text-gray-500 mb-4 font-light">Change the background color to visualize how the frame will look on your wall.</p>
 
                     <div className="mb-6">
-                      <label 
-                        htmlFor="wall-upload"
-                        className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-charcoal hover:bg-gray-50 transition-colors flex flex-col items-center gap-2 cursor-pointer"
+                      <button 
+                        onClick={() => wallInputRef.current?.click()}
+                        className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-charcoal hover:bg-gray-50 transition-colors flex flex-col items-center gap-2"
                       >
                         <Camera className="w-5 h-5 text-gray-400" />
                         <span className="text-sm font-medium text-gray-700">Upload Room Photo</span>
                         <span className="text-xs text-gray-400">See the frame on your actual wall</span>
-                      </label>
+                      </button>
                       <input 
                         id="wall-upload"
                         type="file" 
