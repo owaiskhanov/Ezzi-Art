@@ -247,7 +247,6 @@ export function Customize() {
     if (savedState) {
       try {
         const parsed = JSON.parse(savedState);
-        if (parsed.image) setImage(parsed.image);
         if (parsed.artWidth) setArtWidth(parsed.artWidth);
         if (parsed.artHeight) setArtHeight(parsed.artHeight);
         if (parsed.printMedium) setPrintMedium(parsed.printMedium);
@@ -261,7 +260,6 @@ export function Customize() {
         if (parsed.matSize) setMatSize(parsed.matSize);
         if (parsed.glassType) setGlassType(parsed.glassType);
         if (parsed.wallColor) setWallColor(parsed.wallColor);
-        if (parsed.customWallImage) setCustomWallImage(parsed.customWallImage);
         if (parsed.lighting) setLighting(parsed.lighting);
       } catch (e) {
         console.error("Failed to parse saved state", e);
@@ -272,7 +270,6 @@ export function Customize() {
   // Save state to localStorage when it changes
   useEffect(() => {
     const state = {
-      image,
       artWidth,
       artHeight,
       printMedium,
@@ -286,22 +283,14 @@ export function Customize() {
       matSize,
       glassType,
       wallColor,
-      customWallImage,
       lighting
     };
     try {
       localStorage.setItem('frameStudioState', JSON.stringify(state));
     } catch (e) {
-      console.warn("Storage quota exceeded. Image might be too large to save.", e);
-      // Fallback: save without image if quota is exceeded
-      const stateWithoutImage = { ...state, image: null };
-      try {
-        localStorage.setItem('frameStudioState', JSON.stringify(stateWithoutImage));
-      } catch (err) {
-        console.error("Failed to save state to localStorage", err);
-      }
+      console.warn("Failed to save state to localStorage", e);
     }
-  }, [image, artWidth, artHeight, printMedium, framingType, frameStyle, frameThickness, matStyle, matProfile, matColor, innerMatColor, matSize, glassType, wallColor, customWallImage, lighting]);
+  }, [artWidth, artHeight, printMedium, framingType, frameStyle, frameThickness, matStyle, matProfile, matColor, innerMatColor, matSize, glassType, wallColor, lighting]);
 
   // Price Calculation
   const priceBreakdown = useMemo(() => {
@@ -785,7 +774,6 @@ export function Customize() {
                </div>
                
                <input 
-                 id="art-upload"
                  type="file" 
                  ref={fileInputRef} 
                  onChange={handleImageUpload} 
@@ -1265,7 +1253,6 @@ export function Customize() {
                         <span className="text-xs text-gray-400">See the frame on your actual wall</span>
                       </button>
                       <input 
-                        id="wall-upload"
                         type="file" 
                         ref={wallInputRef} 
                         onChange={handleWallUpload} 
