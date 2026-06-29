@@ -6,51 +6,19 @@ import { cn } from "../lib/utils";
 import { useAuth } from "../lib/auth-context";
 
 function ImageWithSkeleton({ src, alt, className, style, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) {
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  // We should reset load state when src changes
-  useEffect(() => {
-    setIsLoaded(false);
-  }, [src]);
-
   return (
     <div className={`relative ${className}`} style={{ ...style, overflow: 'hidden' }}>
-      <AnimatePresence>
-        {!isLoaded && src && (
-          <motion.div
-            initial={{ opacity: 0.5 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
-            className="absolute inset-0 bg-gray-200/50 backdrop-blur-md rounded-inherit z-0"
-          />
-        )}
-      </AnimatePresence>
       {src && (
         <img
           src={src}
           alt={alt}
-          className={`w-full h-full object-cover transition-opacity duration-500 relative z-10 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-          onLoad={() => setIsLoaded(true)}
+          className={`w-full h-full object-cover relative z-10`}
           {...props}
         />
       )}
     </div>
   );
 }
-
-const Hotspot = ({ top, left, title, description }: { top: string, left: string, title: string, description: string }) => (
-  <div className="absolute z-50 group" style={{ top, left, transform: 'translate(-50%, -50%) translateZ(25px)' }}>
-    <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-charcoal/80 text-white flex items-center justify-center shadow-lg border border-white/20 backdrop-blur-md cursor-help animate-pulse">
-      <Info className="w-3 h-3 md:w-3.5 md:h-3.5" />
-    </div>
-    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-charcoal text-white text-xs p-3 rounded shadow-xl w-48 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity">
-      <h4 className="font-semibold mb-1">{title}</h4>
-      <p className="text-white/80 font-light">{description}</p>
-      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-charcoal"></div>
-    </div>
-  </div>
-);
 
 const FRAMING_TYPES = [
   { id: 'standard', name: 'Standard Frame', desc: 'Classic framed print with glass' },
@@ -482,18 +450,6 @@ export function Customize() {
         
         {!isWrap && (
           <>
-            <Hotspot 
-              top="-10px" 
-              left="50%" 
-              title={`${config.frameStyle.name} Frame`} 
-              description={config.frameStyle.material === 'wood' ? 'Premium hand-finished wood.' : 'Sleek, modern steel profile.'}
-            />
-            <Hotspot 
-              top="50%" 
-              left="50%" 
-              title={`${config.glassType.name}`} 
-              description={config.glassType.description}
-            />
             {config.frameStyle.material === 'wood' && !config.frameStyle.texture && (
                <div className="absolute inset-0 opacity-20 pointer-events-none" 
                     style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', transform: 'translateZ(1px)' }} />
