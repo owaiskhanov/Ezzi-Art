@@ -27,7 +27,16 @@ const FRAMING_TYPES = [
   { id: 'shadowbox', name: 'Shadowbox', desc: 'Deep set art for 3D effect' },
 ];
 
-const FRAME_STYLES = [
+interface FrameStyle {
+  id: string;
+  name: string;
+  color: string;
+  material: string;
+  texture?: string;
+  thumbnail?: string;
+}
+
+const FRAME_STYLES: FrameStyle[] = [
   // Wood
   { id: 'black', name: 'Black Wood', color: '#1a1a1a', material: 'wood' },
   { id: 'walnut', name: 'Walnut Wood', color: '#4a3320', material: 'wood' },
@@ -474,7 +483,7 @@ export function Customize() {
                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', transform: 'translateZ(1px)' }} />
                </>
             )}
-            {!(config.frameStyle as any).thumbnail && !config.frameStyle.texture && ['brushed-gold', 'silver', 'bronze'].includes(config.frameStyle.id) && (
+            {!config.frameStyle.thumbnail && !config.frameStyle.texture && ['brushed-gold', 'silver', 'bronze'].includes(config.frameStyle.id) && (
                <>
                  <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-60" 
                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/brushed-alum.png")', backgroundSize: '200px 200px', transform: 'translateZ(1px)' }} />
@@ -484,7 +493,7 @@ export function Customize() {
                       style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0.6) 1px, transparent 1px, transparent 4px, rgba(255,255,255,0.3) 4px, rgba(255,255,255,0.3) 5px, transparent 5px, transparent 9px, rgba(255,255,255,0.5) 9px, rgba(255,255,255,0.5) 10px, transparent 10px, transparent 15px)', transform: 'translateZ(1px)' }} />
                </>
             )}
-            {!(config.frameStyle as any).thumbnail && !config.frameStyle.texture && ['brushed-gold', 'silver', 'bronze'].includes(config.frameStyle.id) && (
+            {!config.frameStyle.thumbnail && !config.frameStyle.texture && ['brushed-gold', 'silver', 'bronze'].includes(config.frameStyle.id) && (
                <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-90" 
                     style={{ backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 15%, rgba(255,255,255,0) 30%, rgba(0,0,0,0.2) 50%, rgba(255,255,255,0) 70%, rgba(255,255,255,1) 85%, rgba(255,255,255,0) 100%)', transform: 'translateZ(2px)' }} />
             )}
@@ -1021,14 +1030,14 @@ export function Customize() {
                         >
                           <div 
                             className={cn("relative w-full aspect-video rounded mb-2 shadow-inner border border-gray-100 overflow-hidden", 
-                              (style.texture || (style as any).thumbnail) ? "bg-cover bg-center" : ""
+                              (style.texture || style.thumbnail) ? "bg-cover bg-center" : ""
                             )} 
                             style={{ 
                               backgroundColor: style.color,
-                              backgroundImage: (style as any).thumbnail ? `url(${(style as any).thumbnail})` : (style.texture ? `url(${style.texture})` : undefined)
+                              backgroundImage: style.thumbnail ? `url(${style.thumbnail})` : (style.texture ? `url(${style.texture})` : undefined)
                             }}
                           >
-                            {!(style as any).thumbnail && style.material === 'wood' && !style.texture && (
+                            {!style.thumbnail && style.material === 'wood' && !style.texture && (
                                <>
                                  <div className="absolute inset-0 opacity-100 pointer-events-none mix-blend-color-burn" 
                                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")' }} />
@@ -1036,7 +1045,7 @@ export function Customize() {
                                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', backgroundSize: '200px 200px' }} />
                                </>
                             )}
-                            {!(style as any).thumbnail && style.id.startsWith('withered-') && (
+                            {!style.thumbnail && style.id.startsWith('withered-') && (
                                <>
                                  <div className="absolute inset-0 pointer-events-none opacity-80" 
                                       style={{ backgroundColor: '#5c4033', WebkitMaskImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', WebkitMaskSize: '150px 150px', maskImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', maskSize: '150px 150px' }} />
@@ -1044,7 +1053,7 @@ export function Customize() {
                                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")' }} />
                                </>
                             )}
-                            {!(style as any).thumbnail && ['brushed-gold', 'silver', 'bronze'].includes(style.id) && (
+                            {!style.thumbnail && ['brushed-gold', 'silver', 'bronze'].includes(style.id) && (
                                <>
                                  <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-60" 
                                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/brushed-alum.png")', backgroundSize: '200px 200px' }} />
@@ -1054,7 +1063,7 @@ export function Customize() {
                                       style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0.6) 1px, transparent 1px, transparent 4px, rgba(255,255,255,0.3) 4px, rgba(255,255,255,0.3) 5px, transparent 5px, transparent 9px, rgba(255,255,255,0.5) 9px, rgba(255,255,255,0.5) 10px, transparent 10px, transparent 15px)' }} />
                                </>
                             )}
-                            {!(style as any).thumbnail && style.id === 'rusted' && (
+                            {!style.thumbnail && style.id === 'rusted' && (
                                <>
                                  <div className="absolute inset-0 pointer-events-none mix-blend-multiply opacity-90" 
                                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/rusty-metal.png")' }} />
@@ -1063,13 +1072,13 @@ export function Customize() {
                                </>
                             )}
 
-                            {(style as any).thumbnail && (
+                            {style.thumbnail && (
                               <div 
                                 className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center hover:bg-black/80 transition-colors z-10"
                                 title="Actual Frame"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setLightboxImage((style as any).thumbnail);
+                                  setLightboxImage(style.thumbnail);
                                 }}
                               >
                                 <Plus className="w-4 h-4 text-white" />
