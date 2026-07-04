@@ -33,11 +33,16 @@ const FRAME_STYLES = [
   { id: 'walnut', name: 'Walnut Wood', color: '#4a3320', material: 'wood' },
   { id: 'natural', name: 'Natural Oak', color: '#c7b39a', material: 'wood' },
   { id: 'white', name: 'Gallery White', color: '#f5f5f5', material: 'wood' },
-  { id: 'blue-wood', name: 'Blue Wood', color: '#2b4c65', texture: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Blue%20Frame.png', material: 'wood' },
+  { id: 'blue-wood', name: 'Blue Wood', color: '#2b4c65', material: 'wood' },
   { id: 'red-wood', name: 'Red Wood', color: '#8b4513', texture: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Seemless-Red-wood.jpg', material: 'wood' },
-  // Steel
-  { id: 'gold', name: 'Vintage Gold', color: '#bfa15f', material: 'steel' },
-  { id: 'silver', name: 'Brushed Silver', color: '#e0e0e0', material: 'steel' },
+  // Plastic
+  { id: 'brushed-gold', name: 'Brushed Gold', color: '#db9d1e', material: 'plastic' },
+  { id: 'silver', name: 'Brushed Silver', color: '#c0c0c0', material: 'plastic' },
+  { id: 'bronze', name: 'Brushed Bronze', color: '#cd7f32', material: 'plastic' },
+  { id: 'rusted', name: 'Rusted Iron', color: '#8c4b31', material: 'plastic' },
+  { id: 'withered-cream', name: 'Withered Cream', color: '#f0ebd8', material: 'plastic' },
+  { id: 'withered-mint', name: 'Withered Mint', color: '#dbe7e4', material: 'plastic' },
+  { id: 'withered-grey', name: 'Withered Grey', color: '#e0e0e0', material: 'plastic' },
 ];
 
 const STANDARD_SIZES = [
@@ -96,7 +101,7 @@ const triggerHaptic = () => {
 export function Customize() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'size' | 'frame' | 'mat' | 'glass' | 'wall'>('size');
-  const [frameMaterialTab, setFrameMaterialTab] = useState<'wood' | 'steel'>('wood');
+  const [frameMaterialTab, setFrameMaterialTab] = useState<'wood' | 'plastic'>('wood');
   
   // Customization State
   const [image, setImage] = useState<string | null>(null);
@@ -451,8 +456,36 @@ export function Customize() {
         {!isWrap && (
           <>
             {config.frameStyle.material === 'wood' && !config.frameStyle.texture && (
-               <div className="absolute inset-0 opacity-20 pointer-events-none" 
-                    style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', transform: 'translateZ(1px)' }} />
+               <>
+                 <div className="absolute inset-0 opacity-100 pointer-events-none mix-blend-color-burn" 
+                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', transform: 'translateZ(1px)' }} />
+                 <div className="absolute inset-0 opacity-60 pointer-events-none mix-blend-multiply" 
+                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', backgroundSize: '200px 200px', transform: 'translateZ(1px)' }} />
+               </>
+            )}
+            {config.frameStyle.id.startsWith('withered-') && (
+               <>
+                 <div className="absolute inset-0 pointer-events-none opacity-80" 
+                      style={{ backgroundColor: '#5c4033', WebkitMaskImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', WebkitMaskSize: '150px 150px', maskImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', maskSize: '150px 150px', transform: 'translateZ(1px)' }} />
+                 <div className="absolute inset-0 pointer-events-none mix-blend-multiply opacity-50" 
+                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', transform: 'translateZ(1px)' }} />
+               </>
+            )}
+            {['brushed-gold', 'silver', 'bronze'].includes(config.frameStyle.id) && (
+               <div className="absolute inset-0 pointer-events-none mix-blend-screen opacity-50" 
+                    style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.8) 0px, rgba(255,255,255,0.8) 1px, transparent 1px, transparent 3px, rgba(255,255,255,0.4) 3px, rgba(255,255,255,0.4) 4px, transparent 4px, transparent 5px)', transform: 'translateZ(1px)' }} />
+            )}
+            {['brushed-gold', 'silver', 'bronze'].includes(config.frameStyle.id) && (
+               <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-90" 
+                    style={{ backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 15%, rgba(255,255,255,0) 30%, rgba(0,0,0,0.2) 50%, rgba(255,255,255,0) 70%, rgba(255,255,255,1) 85%, rgba(255,255,255,0) 100%)', transform: 'translateZ(2px)' }} />
+            )}
+            {config.frameStyle.id === 'rusted' && (
+               <div className="absolute inset-0 pointer-events-none mix-blend-multiply opacity-100" 
+                    style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/concrete-wall.png")', transform: 'translateZ(1px)' }} />
+            )}
+            {config.frameStyle.id === 'rusted' && (
+               <div className="absolute inset-0 pointer-events-none mix-blend-color-burn opacity-60" 
+                    style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/rusty-metal.png")', transform: 'translateZ(1px)' }} />
             )}
           </>
         )}
@@ -956,10 +989,10 @@ export function Customize() {
                         Wood Frames
                       </button>
                       <button
-                        onClick={() => setFrameMaterialTab('steel')}
-                        className={cn("flex-1 text-xs font-medium py-2 rounded-md transition-all", frameMaterialTab === 'steel' ? "bg-white shadow-sm text-charcoal" : "text-gray-500 hover:text-gray-700")}
+                        onClick={() => setFrameMaterialTab('plastic')}
+                        className={cn("flex-1 text-xs font-medium py-2 rounded-md transition-all", frameMaterialTab === 'plastic' ? "bg-white shadow-sm text-charcoal" : "text-gray-500 hover:text-gray-700")}
                       >
-                        Steel Frames
+                        Plastic Frames
                       </button>
                     </div>
 
@@ -978,14 +1011,39 @@ export function Customize() {
                           )}
                         >
                           <div 
-                            className={cn("w-full aspect-video rounded mb-2 shadow-inner border border-gray-100", 
+                            className={cn("relative w-full aspect-video rounded mb-2 shadow-inner border border-gray-100 overflow-hidden", 
                               style.texture ? "bg-cover bg-center" : ""
                             )} 
                             style={{ 
                               backgroundColor: style.color,
                               backgroundImage: style.texture ? `url(${style.texture})` : undefined
                             }}
-                          />
+                          >
+                            {style.material === 'wood' && !style.texture && (
+                               <>
+                                 <div className="absolute inset-0 opacity-100 pointer-events-none mix-blend-color-burn" 
+                                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")' }} />
+                                 <div className="absolute inset-0 opacity-60 pointer-events-none mix-blend-multiply" 
+                                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', backgroundSize: '200px 200px' }} />
+                               </>
+                            )}
+                            {style.id.startsWith('withered-') && (
+                               <>
+                                 <div className="absolute inset-0 pointer-events-none opacity-80" 
+                                      style={{ backgroundColor: '#5c4033', WebkitMaskImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', WebkitMaskSize: '150px 150px', maskImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', maskSize: '150px 150px' }} />
+                                 <div className="absolute inset-0 pointer-events-none mix-blend-multiply opacity-50" 
+                                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")' }} />
+                               </>
+                            )}
+                            {['brushed-gold', 'silver', 'bronze'].includes(style.id) && (
+                               <div className="absolute inset-0 pointer-events-none mix-blend-screen opacity-50" 
+                                    style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.8) 0px, rgba(255,255,255,0.8) 1px, transparent 1px, transparent 3px, rgba(255,255,255,0.4) 3px, rgba(255,255,255,0.4) 4px, transparent 4px, transparent 5px)' }} />
+                            )}
+                            {style.id === 'rusted' && (
+                               <div className="absolute inset-0 pointer-events-none mix-blend-multiply opacity-100" 
+                                    style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/concrete-wall.png")' }} />
+                            )}
+                          </div>
                           <span className="text-[11px] font-medium text-gray-700 text-center leading-tight">{style.name}</span>
                         </motion.button>
                       ))}
