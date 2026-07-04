@@ -36,8 +36,8 @@ const FRAME_STYLES = [
   { id: 'blue-wood', name: 'Blue Wood', color: '#2b4c65', material: 'wood' },
   { id: 'red-wood', name: 'Red Wood', color: '#8b4513', texture: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Seemless-Red-wood.jpg', material: 'wood' },
   // Plastic
-  { id: 'brushed-gold', name: 'Brushed Gold', color: '#db9d1e', material: 'plastic', thumbnail: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Brushed-Gold-Texture.jpg' },
-  { id: 'silver', name: 'Brushed Silver', color: '#c0c0c0', material: 'plastic' },
+  { id: 'brushed-gold', name: 'Brushed Gold', color: '#db9d1e', material: 'plastic', texture: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Brushed-Gold-Texture.jpg', thumbnail: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Brushed-Gold-Texture.jpg' },
+  { id: 'silver', name: 'Brushed Silver', color: '#c0c0c0', material: 'plastic', texture: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Brushed-silver-Texture.jpg', thumbnail: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Brushed-silver-Texture.jpg' },
   { id: 'bronze', name: 'Brushed Bronze', color: '#cd7f32', material: 'plastic' },
   { id: 'rusted', name: 'Rusted Iron', color: '#8c4b31', material: 'plastic' },
   { id: 'withered-cream', name: 'Withered Cream', color: '#f0ebd8', material: 'plastic' },
@@ -72,6 +72,7 @@ const MAT_SIZES = [
 ];
 
 const GLASS_TYPES = [
+  { id: 'none', name: 'No Glass', description: 'Just the frame, no glazing.', multiplier: 0 },
   { id: 'standard', name: 'Standard Clear', description: 'Basic protection, slight glare.', multiplier: 1 },
   { id: 'non-glare', name: 'Non-Glare', description: 'Reduces reflections, slight matte finish.', multiplier: 1.2 },
   { id: 'uv', name: 'UV Conservation', description: '99% UV blocking to prevent fading.', multiplier: 1.5 },
@@ -473,7 +474,7 @@ export function Customize() {
                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', transform: 'translateZ(1px)' }} />
                </>
             )}
-            {['brushed-gold', 'silver', 'bronze'].includes(config.frameStyle.id) && (
+            {!(config.frameStyle as any).thumbnail && !config.frameStyle.texture && ['brushed-gold', 'silver', 'bronze'].includes(config.frameStyle.id) && (
                <>
                  <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-60" 
                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/brushed-alum.png")', backgroundSize: '200px 200px', transform: 'translateZ(1px)' }} />
@@ -483,7 +484,7 @@ export function Customize() {
                       style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0.6) 1px, transparent 1px, transparent 4px, rgba(255,255,255,0.3) 4px, rgba(255,255,255,0.3) 5px, transparent 5px, transparent 9px, rgba(255,255,255,0.5) 9px, rgba(255,255,255,0.5) 10px, transparent 10px, transparent 15px)', transform: 'translateZ(1px)' }} />
                </>
             )}
-            {['brushed-gold', 'silver', 'bronze'].includes(config.frameStyle.id) && (
+            {!(config.frameStyle as any).thumbnail && !config.frameStyle.texture && ['brushed-gold', 'silver', 'bronze'].includes(config.frameStyle.id) && (
                <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-90" 
                     style={{ backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 15%, rgba(255,255,255,0) 30%, rgba(0,0,0,0.2) 50%, rgba(255,255,255,0) 70%, rgba(255,255,255,1) 85%, rgba(255,255,255,0) 100%)', transform: 'translateZ(2px)' }} />
             )}
@@ -529,7 +530,7 @@ export function Customize() {
             </>
           )}
 
-          {(!isWrap && config.glassType.id !== 'museum' && config.glassType.id !== 'non-glare') && (
+          {(!isWrap && config.glassType.id !== 'none' && config.glassType.id !== 'museum' && config.glassType.id !== 'non-glare') && (
              <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 pointer-events-none z-10" 
                   style={{ transform: 'translateZ(15px)' }}/>
           )}
