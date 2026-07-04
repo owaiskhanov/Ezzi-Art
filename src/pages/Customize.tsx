@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "motion/react";
-import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info, Columns, ZoomIn, ZoomOut, Maximize, ChevronDown, ChevronUp } from "lucide-react";
+import { Upload, Image as ImageIcon, RotateCcw, ArrowLeft, Ruler, Palette, Frame, ShoppingBag, BoxSelect, Droplets, Camera, Wand2, Info, Columns, ZoomIn, ZoomOut, Maximize, ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
 import { useAuth } from "../lib/auth-context";
@@ -36,7 +36,7 @@ const FRAME_STYLES = [
   { id: 'blue-wood', name: 'Blue Wood', color: '#2b4c65', material: 'wood' },
   { id: 'red-wood', name: 'Red Wood', color: '#8b4513', texture: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Seemless-Red-wood.jpg', material: 'wood' },
   // Plastic
-  { id: 'brushed-gold', name: 'Brushed Gold', color: '#db9d1e', material: 'plastic' },
+  { id: 'brushed-gold', name: 'Brushed Gold', color: '#db9d1e', material: 'plastic', thumbnail: 'https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Frames_temp/Brushed-Gold-Texture.jpg' },
   { id: 'silver', name: 'Brushed Silver', color: '#c0c0c0', material: 'plastic' },
   { id: 'bronze', name: 'Brushed Bronze', color: '#cd7f32', material: 'plastic' },
   { id: 'rusted', name: 'Rusted Iron', color: '#8c4b31', material: 'plastic' },
@@ -139,6 +139,8 @@ export function Customize() {
   // Mobile Cart State
   const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
   const [isPanelMinimized, setIsPanelMinimized] = useState(false);
+  
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   // 3D Rotation State
   const mouseX = useMotionValue(0);
@@ -472,20 +474,26 @@ export function Customize() {
                </>
             )}
             {['brushed-gold', 'silver', 'bronze'].includes(config.frameStyle.id) && (
-               <div className="absolute inset-0 pointer-events-none mix-blend-screen opacity-50" 
-                    style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.8) 0px, rgba(255,255,255,0.8) 1px, transparent 1px, transparent 3px, rgba(255,255,255,0.4) 3px, rgba(255,255,255,0.4) 4px, transparent 4px, transparent 5px)', transform: 'translateZ(1px)' }} />
+               <>
+                 <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-60" 
+                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/brushed-alum.png")', backgroundSize: '200px 200px', transform: 'translateZ(1px)' }} />
+                 <div className="absolute inset-0 pointer-events-none mix-blend-multiply opacity-20" 
+                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/brushed-alum-dark.png")', backgroundSize: '150px 150px', transform: 'translateZ(1px)' }} />
+                 <div className="absolute inset-0 pointer-events-none mix-blend-screen opacity-40" 
+                      style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0.6) 1px, transparent 1px, transparent 4px, rgba(255,255,255,0.3) 4px, rgba(255,255,255,0.3) 5px, transparent 5px, transparent 9px, rgba(255,255,255,0.5) 9px, rgba(255,255,255,0.5) 10px, transparent 10px, transparent 15px)', transform: 'translateZ(1px)' }} />
+               </>
             )}
             {['brushed-gold', 'silver', 'bronze'].includes(config.frameStyle.id) && (
                <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-90" 
                     style={{ backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 15%, rgba(255,255,255,0) 30%, rgba(0,0,0,0.2) 50%, rgba(255,255,255,0) 70%, rgba(255,255,255,1) 85%, rgba(255,255,255,0) 100%)', transform: 'translateZ(2px)' }} />
             )}
             {config.frameStyle.id === 'rusted' && (
-               <div className="absolute inset-0 pointer-events-none mix-blend-multiply opacity-100" 
-                    style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/concrete-wall.png")', transform: 'translateZ(1px)' }} />
-            )}
-            {config.frameStyle.id === 'rusted' && (
-               <div className="absolute inset-0 pointer-events-none mix-blend-color-burn opacity-60" 
-                    style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/rusty-metal.png")', transform: 'translateZ(1px)' }} />
+               <>
+                 <div className="absolute inset-0 pointer-events-none mix-blend-multiply opacity-90" 
+                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/rusty-metal.png")', transform: 'translateZ(1px)' }} />
+                 <div className="absolute inset-0 pointer-events-none mix-blend-color-burn opacity-80" 
+                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png")', transform: 'translateZ(1px)' }} />
+               </>
             )}
           </>
         )}
@@ -1012,14 +1020,14 @@ export function Customize() {
                         >
                           <div 
                             className={cn("relative w-full aspect-video rounded mb-2 shadow-inner border border-gray-100 overflow-hidden", 
-                              style.texture ? "bg-cover bg-center" : ""
+                              (style.texture || (style as any).thumbnail) ? "bg-cover bg-center" : ""
                             )} 
                             style={{ 
                               backgroundColor: style.color,
-                              backgroundImage: style.texture ? `url(${style.texture})` : undefined
+                              backgroundImage: (style as any).thumbnail ? `url(${(style as any).thumbnail})` : (style.texture ? `url(${style.texture})` : undefined)
                             }}
                           >
-                            {style.material === 'wood' && !style.texture && (
+                            {!(style as any).thumbnail && style.material === 'wood' && !style.texture && (
                                <>
                                  <div className="absolute inset-0 opacity-100 pointer-events-none mix-blend-color-burn" 
                                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")' }} />
@@ -1027,7 +1035,7 @@ export function Customize() {
                                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', backgroundSize: '200px 200px' }} />
                                </>
                             )}
-                            {style.id.startsWith('withered-') && (
+                            {!(style as any).thumbnail && style.id.startsWith('withered-') && (
                                <>
                                  <div className="absolute inset-0 pointer-events-none opacity-80" 
                                       style={{ backgroundColor: '#5c4033', WebkitMaskImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', WebkitMaskSize: '150px 150px', maskImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")', maskSize: '150px 150px' }} />
@@ -1035,13 +1043,36 @@ export function Customize() {
                                       style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")' }} />
                                </>
                             )}
-                            {['brushed-gold', 'silver', 'bronze'].includes(style.id) && (
-                               <div className="absolute inset-0 pointer-events-none mix-blend-screen opacity-50" 
-                                    style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.8) 0px, rgba(255,255,255,0.8) 1px, transparent 1px, transparent 3px, rgba(255,255,255,0.4) 3px, rgba(255,255,255,0.4) 4px, transparent 4px, transparent 5px)' }} />
+                            {!(style as any).thumbnail && ['brushed-gold', 'silver', 'bronze'].includes(style.id) && (
+                               <>
+                                 <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-60" 
+                                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/brushed-alum.png")', backgroundSize: '200px 200px' }} />
+                                 <div className="absolute inset-0 pointer-events-none mix-blend-multiply opacity-20" 
+                                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/brushed-alum-dark.png")', backgroundSize: '150px 150px' }} />
+                                 <div className="absolute inset-0 pointer-events-none mix-blend-screen opacity-40" 
+                                      style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0.6) 1px, transparent 1px, transparent 4px, rgba(255,255,255,0.3) 4px, rgba(255,255,255,0.3) 5px, transparent 5px, transparent 9px, rgba(255,255,255,0.5) 9px, rgba(255,255,255,0.5) 10px, transparent 10px, transparent 15px)' }} />
+                               </>
                             )}
-                            {style.id === 'rusted' && (
-                               <div className="absolute inset-0 pointer-events-none mix-blend-multiply opacity-100" 
-                                    style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/concrete-wall.png")' }} />
+                            {!(style as any).thumbnail && style.id === 'rusted' && (
+                               <>
+                                 <div className="absolute inset-0 pointer-events-none mix-blend-multiply opacity-90" 
+                                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/rusty-metal.png")' }} />
+                                 <div className="absolute inset-0 pointer-events-none mix-blend-color-burn opacity-80" 
+                                      style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png")' }} />
+                               </>
+                            )}
+
+                            {(style as any).thumbnail && (
+                              <div 
+                                className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center hover:bg-black/80 transition-colors z-10"
+                                title="Actual Frame"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setLightboxImage((style as any).thumbnail);
+                                }}
+                              >
+                                <Plus className="w-4 h-4 text-white" />
+                              </div>
                             )}
                           </div>
                           <span className="text-[11px] font-medium text-gray-700 text-center leading-tight">{style.name}</span>
@@ -1442,6 +1473,40 @@ export function Customize() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Lightbox for Texture/Thumbnail Previews */}
+      <AnimatePresence>
+        {lightboxImage && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightboxImage(null)}
+            className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm cursor-zoom-out"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative max-w-4xl w-full aspect-square md:aspect-video rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/20"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={() => setLightboxImage(null)}
+                className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors backdrop-blur-md"
+              >
+                <ZoomOut className="w-5 h-5" />
+              </button>
+              <img 
+                src={lightboxImage} 
+                alt="Actual Frame Texture" 
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
