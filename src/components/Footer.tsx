@@ -3,8 +3,8 @@ import { Instagram, Facebook, Twitter, MapPin, Phone, Mail } from "lucide-react"
 
 export function Footer() {
   return (
-    <footer className="bg-white pt-20 pb-8 border-t border-gray-100">
-      <div className="max-w-7xl mx-auto px-6">
+    <footer className="bg-white pt-20 pb-0 border-t border-gray-100">
+      <div className="max-w-7xl mx-auto px-6 pb-12">
         <div className="flex flex-col items-center mb-16">
           <img 
             src="https://eonokgjkgvtqamfhvyuv.supabase.co/storage/v1/object/public/EzziArt/Logo/logo.svg" 
@@ -76,6 +76,18 @@ export function Footer() {
             <Link to="#" className="hover:text-gold-light transition-colors">Terms of Service</Link>
           </div>
         </div>
+      </div>
+
+      <div id="stalite-media-watermark" className="border-t border-white/[0.04] bg-black/50 py-3 px-6 text-center">
+        <a
+          href="https://www.stalite.in/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-[10.5px] tracking-[0.18em] uppercase text-white/20 hover:text-white/45 transition-colors group"
+        >
+          <span>Managed by</span>
+          <span className="text-white/30 group-hover:text-gold-light transition-colors font-medium">Stalite Media</span>
+        </a>
       </div>
     </footer>
   );
